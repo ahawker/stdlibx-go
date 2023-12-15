@@ -5,6 +5,8 @@ Extensions to the standard library commonly found in `utils` or `helpers` direct
 ## Languages
 
 * [golang](go)
+* [python](python)
+* [shell](sh)
 
 ## License
 
