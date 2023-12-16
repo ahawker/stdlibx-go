@@ -1,7 +1,6 @@
 # stdlibx-go
 
-Extensions to the standard library commonly found in `utils` or `helpers` directories
-for [golang](https://go.dev/).
+Extensions to the [golang](https://go.dev/) stdlib.
 
 ## License
 
