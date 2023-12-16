@@ -1,12 +1,7 @@
-# stdlibx
+# stdlibx-go
 
-Extensions to the standard library commonly found in `utils` or `helpers` directories.
-
-## Languages
-
-* [golang](go)
-* [python](python)
-* [shell](sh)
+Extensions to the standard library commonly found in `utils` or `helpers` directories
+for [golang](https://go.dev/).
 
 ## License
 
