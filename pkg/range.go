@@ -6,7 +6,7 @@ type Ranger[T any] interface {
 	// Range calls the given function for all items available for iteration.
 	//
 	// If Range returns `false`, iteration will stop.
-	Range(func(t T) bool)
+	Range(predicate Predicate[T])
 }
 
 // KeyedRanger describes types that export a `Range` method for iteration
@@ -15,5 +15,5 @@ type KeyedRanger[K comparable, V any] interface {
 	// Range calls the given function for all items available for iteration.
 	//
 	// If Range returns `false`, iteration will stop.
-	Range(func(k K, v V) bool)
+	Range(predicate KeyedPredicate[K, V])
 }

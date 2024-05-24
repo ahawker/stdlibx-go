@@ -21,7 +21,7 @@ func SliceToMap[K comparable, V any](input []V, key func(v V) K) map[K]V {
 
 // SliceFilter will return a new slice containing only items
 // from the given input that match the predicate function.
-func SliceFilter[T any](input []T, predicate func(t T) bool) []T {
+func SliceFilter[T any](input []T, predicate Predicate[T]) []T {
 	var filtered []T
 	for _, item := range input {
 		if predicate(item) {
@@ -33,7 +33,7 @@ func SliceFilter[T any](input []T, predicate func(t T) bool) []T {
 
 // SliceFilterRange will return a new slice containing only items
 // from the given input ranger that match the predicate function.
-func SliceFilterRange[T any](input Ranger[T], predicate func(t T) bool) []T {
+func SliceFilterRange[T any](input Ranger[T], predicate Predicate[T]) []T {
 	var filtered []T
 	input.Range(func(item T) bool {
 		if predicate(item) {
