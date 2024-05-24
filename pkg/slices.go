@@ -21,3 +21,16 @@ func SliceFilter[T any](input []T, predicate func(t T) bool) []T {
 	}
 	return filtered
 }
+
+// SliceFilterRange will return a new slice containing only items
+// from the given input ranger that match the predicate function.
+func SliceFilterRange[T any](input Ranger[T], predicate func(t T) bool) []T {
+	var filtered []T
+	input.Range(func(item T) bool {
+		if predicate(item) {
+			filtered = append(filtered, item)
+		}
+		return true
+	})
+	return filtered
+}
