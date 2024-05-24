@@ -5,3 +5,12 @@ Extensions to [golang](https://go.dev/) stdlib. Zero dependencies.
 ## License
 
 [Apache 2.0](LICENSE)
+
+## Usage
+
+```shell
+$ make help
+modules                        Tidy and vendor Go modules for local development.
+test                           Run tests.
+test-benchmark                 Run benchmark tests.
+```
