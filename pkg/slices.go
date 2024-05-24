@@ -4,10 +4,20 @@ package stdlibx
 // single slice.
 func SliceFlatten[T any](slices ...[]T) ([]T, error) {
 	var flattened []T
-
 	for _, slice := range slices {
 		flattened = append(flattened, slice...)
 	}
-
 	return flattened, nil
+}
+
+// SliceFilter will return a new slice containing only items
+// from the given input that match the predicate function.
+func SliceFilter[T any](input []T, predicate func(t T) bool) []T {
+	var filtered []T
+	for _, item := range input {
+		if predicate(item) {
+			filtered = append(filtered, item)
+		}
+	}
+	return filtered
 }
