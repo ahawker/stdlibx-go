@@ -2,7 +2,6 @@
 .DEFAULT_GOAL := help
 .SHELLFLAGS   := -eou pipefail
 
-
 .PHONY: modules
 modules: ## Tidy and vendor Go modules for local development.
 	@go mod tidy
