@@ -1,6 +1,6 @@
 # stdlibx-go
 
-Extensions to the [golang](https://go.dev/) stdlib.
+Extensions to [golang](https://go.dev/) stdlib. Zero dependencies.
 
 ## License
 
