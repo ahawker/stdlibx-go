@@ -2,12 +2,21 @@ package stdlibx
 
 // SliceFlatten will flatten a slice of slices into a
 // single slice.
-func SliceFlatten[T any](slices ...[]T) ([]T, error) {
+func SliceFlatten[T any](slices ...[]T) []T {
 	var flattened []T
 	for _, slice := range slices {
 		flattened = append(flattened, slice...)
 	}
-	return flattened, nil
+	return flattened
+}
+
+// SliceToMap returns a map from the given slice and key function.
+func SliceToMap[K comparable, V any](input []V, key func(v V) K) map[K]V {
+	result := make(map[K]V, len(input))
+	for _, item := range input {
+		result[key(item)] = item
+	}
+	return result
 }
 
 // SliceFilter will return a new slice containing only items
