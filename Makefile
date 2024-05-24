@@ -9,7 +9,7 @@ modules: ## Tidy and vendor Go modules for local development.
 
 .PHONY: test
 test: ## Run tests.
-	@go clean -testcache && go test -race ./... -coverprofile=coverage.out
+	@go clean -testcache && go test -race ./... -coverprofile=coverage.out && rm coverage.out
 
 .PHONY: test-benchmark
 test-benchmark: ## Run benchmark tests.
