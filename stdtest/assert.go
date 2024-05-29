@@ -18,8 +18,8 @@ type Asserter interface {
 	NotOK(err error) bool
 	Match(got, want string) bool
 	Equal(got, want any) bool
-	PointerEqual(got, want any) bool
-	ErrorEqual(got, want error) bool
+	EqualPointer(got, want any) bool
+	EqualError(got, want error) bool
 	Panic(got func()) bool
 }
 
@@ -98,8 +98,8 @@ func (a *Assert) Equal(got, want any) bool {
 	return true
 }
 
-// PointerEqual fails the test if got is not equal to want for pointers.
-func (a *Assert) PointerEqual(got, want any) bool {
+// EqualPointer fails the test if got is not equal to want for pointers.
+func (a *Assert) EqualPointer(got, want any) bool {
 	a.tb.Helper()
 	gotP := reflect.ValueOf(got).Pointer()
 	wantP := reflect.ValueOf(want).Pointer()
@@ -110,10 +110,10 @@ func (a *Assert) PointerEqual(got, want any) bool {
 	return true
 }
 
-// ErrorEqual fails the test if got is not equal to want for errors.
-func (a *Assert) ErrorEqual(got, want error) bool {
+// EqualError fails the test if got is not equal to want for errors.
+func (a *Assert) EqualError(got, want error) bool {
 	a.tb.Helper()
-	if !errors.Is(want, got) {
+	if errors.Is(want, got) || errors.Is(got, want) {
 		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", got, want)
 		return false
 	}
