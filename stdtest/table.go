@@ -30,8 +30,8 @@ type Table[TGot any, TWant any] map[string]Testcase[TGot, TWant]
 // TableRun will execute all testcases as unit tests with the given test function.
 func TableRun[TGot any, TWant any](
 	t testing.TB,
-	fn TestFunc[TGot, TWant],
 	table Table[TGot, TWant],
+	fn TestFunc[TGot, TWant],
 	options ...stdlib.Option[*TestConfig],
 ) {
 	t.Helper()
