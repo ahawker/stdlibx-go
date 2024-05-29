@@ -1,4 +1,4 @@
-package stdlibx
+package stdlib
 
 // Ranger describes types that export a `Range` method for iteration
 // over single item collections.

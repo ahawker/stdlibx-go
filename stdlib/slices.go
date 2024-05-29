@@ -1,4 +1,4 @@
-package stdlibx
+package stdlib
 
 // SliceFlatten will flatten a slice of slices into a
 // single slice.

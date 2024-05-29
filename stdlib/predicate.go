@@ -1,4 +1,4 @@
-package stdlibx
+package stdlib
 
 // Predicate describes functions which return true/false based on a given input.
 type Predicate[T any] func(t T) bool

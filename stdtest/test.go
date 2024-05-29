@@ -1,7 +1,7 @@
-package testingx
+package stdtest
 
 import (
-	"github.com/ahawker/stdlibx-go/stdlibx"
+	"github.com/ahawker/stdlibx-go/stdlib"
 	"testing"
 )
 
@@ -12,9 +12,9 @@ var (
 
 // BenchmarkTest creates a new *Benchmark configured for running only "benchmark" tests
 // when the BENCHMARK_TEST environment variable is set.
-func BenchmarkTest(t *testing.B, options ...stdlibx.Option[*TestConfig]) *Test {
+func BenchmarkTest(t *testing.B, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
-	defaults := []stdlibx.Option[*TestConfig]{
+	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(testPreconditionEnvVarSet("BENCHMARK_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
@@ -22,9 +22,9 @@ func BenchmarkTest(t *testing.B, options ...stdlibx.Option[*TestConfig]) *Test {
 
 // FuzzTest creates a new *Benchmark configured for running only "fuzz" tests
 // when the FUZZ_TEST environment variable is set.
-func FuzzTest(t *testing.F, options ...stdlibx.Option[*TestConfig]) *Test {
+func FuzzTest(t *testing.F, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
-	defaults := []stdlibx.Option[*TestConfig]{
+	defaults := []stdlib.Option[*TestConfig]{
 		WithTestLogf(t.Errorf),
 		WithTestPrecondition(testPreconditionEnvVarSet("FUZZ_TEST")),
 	}
@@ -33,37 +33,37 @@ func FuzzTest(t *testing.F, options ...stdlibx.Option[*TestConfig]) *Test {
 
 // IntegrationTest creates a new *Test configured for running only "integration" tests
 // when the INTEGRATION_TEST environment variable is set.
-func IntegrationTest(t *testing.T, options ...stdlibx.Option[*TestConfig]) *Test {
+func IntegrationTest(t *testing.T, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
-	defaults := []stdlibx.Option[*TestConfig]{
+	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(testPreconditionEnvVarSet("INTEGRATION_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
 
 // PropertyTest creates a new *Test configured for running only "property" tests.
-func PropertyTest(t testing.TB, options ...stdlibx.Option[*TestConfig]) *Test {
+func PropertyTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
-	defaults := []stdlibx.Option[*TestConfig]{
+	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(testPreconditionEnvVarSet("PROPERTY_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
 
 // UnitTest creates a new *Test configured for running only "unit" tests.
-func UnitTest(t testing.TB, options ...stdlibx.Option[*TestConfig]) *Test {
+func UnitTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
-	defaults := []stdlibx.Option[*TestConfig]{
+	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(testPreconditionEnvVarSet("UNIT_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
 
 // newTest creates a new *Test with the given options.
-func newTest(t testing.TB, options ...stdlibx.Option[*TestConfig]) *Test {
+func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
 
-	defaults := []stdlibx.Option[*TestConfig]{
+	defaults := []stdlib.Option[*TestConfig]{
 		WithTestLogf(t.Fatalf),
 	}
 	config, err := NewTestConfig(append(defaults, options...)...)
@@ -113,7 +113,7 @@ type Test struct {
 func (t *Test) Sub(
 	name string,
 	fn func(subtest *Test),
-	options ...stdlibx.Option[*TestConfig],
+	options ...stdlib.Option[*TestConfig],
 ) bool {
 	switch tb := t.TB.(type) {
 	case *testing.T:

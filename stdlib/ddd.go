@@ -1,4 +1,4 @@
-package stdlibx
+package stdlib
 
 type Equaler[T any] interface {
 	Equal(x T, y T) bool

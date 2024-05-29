@@ -1,4 +1,4 @@
-package stdlibx
+package stdlib
 
 import "reflect"
 

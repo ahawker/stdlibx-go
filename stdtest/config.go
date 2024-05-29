@@ -1,8 +1,8 @@
-package testingx
+package stdtest
 
 import (
 	"fmt"
-	"github.com/ahawker/stdlibx-go/stdlibx"
+	"github.com/ahawker/stdlibx-go/stdlib"
 	"math/rand"
 	"os"
 	"strconv"
@@ -68,7 +68,7 @@ func testPreconditionEnvVarSet(name string) TestPrecondition {
 
 // NewTestConfig creates a new *TestConfig for the given functional opts
 // and sane defaults.
-func NewTestConfig(options ...stdlibx.Option[*TestConfig]) (*TestConfig, error) {
+func NewTestConfig(options ...stdlib.Option[*TestConfig]) (*TestConfig, error) {
 	config := &TestConfig{
 		Logf:         defaultTestConfig.Logf,
 		Parallel:     defaultTestConfig.Parallel,
@@ -78,7 +78,7 @@ func NewTestConfig(options ...stdlibx.Option[*TestConfig]) (*TestConfig, error) 
 			Rand:     defaultTestConfig.QuickConfig.Rand,
 		},
 	}
-	return stdlibx.OptionApply(config, options...)
+	return stdlib.OptionApply(config, options...)
 }
 
 // TestConfig defines config options for test.
@@ -95,7 +95,7 @@ type TestConfig struct {
 }
 
 // WithTestLogf sets the config logf.
-func WithTestLogf(log Logf) stdlibx.Option[*TestConfig] {
+func WithTestLogf(log Logf) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.Logf = log
 		return nil
@@ -103,7 +103,7 @@ func WithTestLogf(log Logf) stdlibx.Option[*TestConfig] {
 }
 
 // WithTestParallel sets the config parallel.
-func WithTestParallel(parallel bool) stdlibx.Option[*TestConfig] {
+func WithTestParallel(parallel bool) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.Parallel = parallel
 		return nil
@@ -111,7 +111,7 @@ func WithTestParallel(parallel bool) stdlibx.Option[*TestConfig] {
 }
 
 // WithTestPrecondition sets the config precondition.
-func WithTestPrecondition(precondition TestPrecondition) stdlibx.Option[*TestConfig] {
+func WithTestPrecondition(precondition TestPrecondition) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.Precondition = precondition
 		return nil
@@ -119,7 +119,7 @@ func WithTestPrecondition(precondition TestPrecondition) stdlibx.Option[*TestCon
 }
 
 // WithTestMaxCount sets the config property testing max count.
-func WithTestMaxCount(maxCount int) stdlibx.Option[*TestConfig] {
+func WithTestMaxCount(maxCount int) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.QuickConfig.MaxCount = maxCount
 		return nil
@@ -127,7 +127,7 @@ func WithTestMaxCount(maxCount int) stdlibx.Option[*TestConfig] {
 }
 
 // WithTestMaxCountScale sets the config property testing max count scale.
-func WithTestMaxCountScale(maxCountScale float64) stdlibx.Option[*TestConfig] {
+func WithTestMaxCountScale(maxCountScale float64) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.QuickConfig.MaxCountScale = maxCountScale
 		return nil
@@ -135,7 +135,7 @@ func WithTestMaxCountScale(maxCountScale float64) stdlibx.Option[*TestConfig] {
 }
 
 // WithTestRand sets the config rand number generator.
-func WithTestRand(r *rand.Rand) stdlibx.Option[*TestConfig] {
+func WithTestRand(r *rand.Rand) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.QuickConfig.Rand = r
 		return nil

@@ -1,7 +1,7 @@
-package testingx
+package stdtest
 
 import (
-	"github.com/ahawker/stdlibx-go/stdlibx"
+	"github.com/ahawker/stdlibx-go/stdlib"
 	"testing"
 )
 
@@ -20,7 +20,7 @@ type Testcase[TGot any, TWant any] struct {
 	// WantErr stores the optional error expectation for the testcase.
 	WantErr error
 	// Options are custom options for test execution specific to this case.
-	Options []stdlibx.Option[*TestConfig]
+	Options []stdlib.Option[*TestConfig]
 }
 
 // Table represents a collection of "table tests" in the form of
@@ -32,7 +32,7 @@ func TableRun[TGot any, TWant any](
 	t testing.TB,
 	fn TestFunc[TGot, TWant],
 	table Table[TGot, TWant],
-	options ...stdlibx.Option[*TestConfig],
+	options ...stdlib.Option[*TestConfig],
 ) {
 	t.Helper()
 	test := newTest(t, options...)

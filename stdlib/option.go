@@ -1,4 +1,4 @@
-package stdlibx
+package stdlib
 
 // Option defines functional options for type t.
 type Option[T any] func(t T) error

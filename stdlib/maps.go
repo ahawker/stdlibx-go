@@ -1,4 +1,4 @@
-package stdlibx
+package stdlib
 
 // MapFilter will return a new map containing only items
 // from the input map that match the predicate function.
