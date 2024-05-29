@@ -28,9 +28,8 @@ type Testcase[TGot any, TWant any] struct {
 type Table[TGot any, TWant any] map[string]Testcase[TGot, TWant]
 
 // Run will execute all table tests using the given test function.
-func (t Table[TGot, TWant]) Run(
+func (table Table[TGot, TWant]) Run(
 	tb testing.TB,
-	table Table[TGot, TWant],
 	testFn TestFunc[TGot, TWant],
 	options ...stdlib.Option[*TestConfig],
 ) {
