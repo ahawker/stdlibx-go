@@ -27,18 +27,18 @@ type Testcase[TGot any, TWant any] struct {
 // named test cases.
 type Table[TGot any, TWant any] map[string]Testcase[TGot, TWant]
 
-// TableRun will execute all testcases as unit tests with the given test function.
-func TableRun[TGot any, TWant any](
-	t testing.TB,
+// Run will execute all table tests using the given test function.
+func (t Table[TGot, TWant]) Run(
+	tb testing.TB,
 	table Table[TGot, TWant],
-	fn TestFunc[TGot, TWant],
+	testFn TestFunc[TGot, TWant],
 	options ...stdlib.Option[*TestConfig],
 ) {
-	t.Helper()
-	test := newTest(t, options...)
+	tb.Helper()
+	test := newTest(tb, options...)
 	for name, testcase := range table {
 		subtestFn := func(subtest *Test) {
-			fn(subtest, testcase)
+			testFn(subtest, testcase)
 		}
 		test.Sub(name, subtestFn, append(options, testcase.Options...)...)
 	}
