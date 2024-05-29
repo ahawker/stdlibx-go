@@ -113,7 +113,7 @@ func (a *Assert) EqualPointer(got, want any) bool {
 // EqualError fails the test if got is not equal to want for errors.
 func (a *Assert) EqualError(got, want error) bool {
 	a.tb.Helper()
-	if errors.Is(want, got) || errors.Is(got, want) {
+	if !errors.Is(got, want) && !errors.Is(want, got) {
 		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", got, want)
 		return false
 	}
