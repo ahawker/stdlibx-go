@@ -20,6 +20,7 @@ type Asserter interface {
 	Equal(got, want any) bool
 	EqualPointer(got, want any) bool
 	EqualError(got, want error) bool
+	EqualType(got, want any) bool
 	Panic(got func()) bool
 }
 
@@ -115,6 +116,18 @@ func (a *Assert) EqualError(got, want error) bool {
 	a.tb.Helper()
 	if !errors.Is(got, want) && !errors.Is(want, got) {
 		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", got, want)
+		return false
+	}
+	return true
+}
+
+// EqualType fails the test if got is not equal to want for concrete types.
+func (a *Assert) EqualType(got, want any) bool {
+	a.tb.Helper()
+	gotT := reflect.TypeOf(got)
+	wantT := reflect.TypeOf(want)
+	if gotT != wantT {
+		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", gotT, wantT)
 		return false
 	}
 	return true
