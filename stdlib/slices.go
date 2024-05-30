@@ -10,6 +10,16 @@ func SliceFlatten[T any](slices ...[]T) []T {
 	return flattened
 }
 
+// SliceTypeAssert takes a slice of one type and asserts individual
+// items to the other.
+func SliceTypeAssert[TIn any, TOut any](slice []TIn) []TOut {
+	result := make([]TOut, 0, len(slice))
+	for _, item := range slice {
+		result = append(result, any(item).(TOut))
+	}
+	return result
+}
+
 // SliceToMap returns a map from the given slice and key function.
 func SliceToMap[K comparable, V any](input []V, key func(v V) K) map[K]V {
 	result := make(map[K]V, len(input))

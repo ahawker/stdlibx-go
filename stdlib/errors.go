@@ -469,6 +469,15 @@ func (g *ErrorGroup) Append(errs ...error) {
 			continue
 		}
 
+		// When given an error that's a group, we want to flatten & merge
+		// the items.
+		var eg *ErrorGroup
+		if errors.As(err, &eg) {
+			g.Append(SliceTypeAssert[Error, error](eg.Errors)...)
+			continue
+		}
+
+		// When given a generic error that isn't Error, wrap it.
 		var e Error
 		if !errors.As(err, &e) {
 			e = ErrUndefined.Wrap(err)
@@ -589,4 +598,25 @@ func ErrorTranslateGroup(translate ErrorTranslate, errors ...error) *ErrorGroup 
 		}
 	}
 	return g
+}
+
+// ErrorJoin is a helper function that will append more errors
+// onto an ErrorGroup.
+//
+// If err is not already an ErrorGroup, then it will be turned into
+// one. If any of the errs are ErrorGroup, they will be flattened
+// one level into err.
+// Any nil errors within errs will be ignored. If err is nil, a new
+// *ErrorGroup will be returned containing the given errs.
+func ErrorJoin(err error, errs ...error) *ErrorGroup {
+	var eg *ErrorGroup
+
+	switch {
+	case errors.As(err, &eg):
+		eg.Append(errs...)
+		return eg
+	default:
+		eg.Append(SliceFlatten([]error{err}, errs)...)
+		return eg
+	}
 }
