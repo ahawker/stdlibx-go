@@ -83,6 +83,12 @@ func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 		}
 	}
 
+	// Set process environment variables for the duration of the test.
+	// Note: This does not work with parallel tests.
+	for k, v := range config.Env {
+		t.Setenv(k, v)
+	}
+
 	return &Test{
 		TB: t,
 		Asserter: &Assert{

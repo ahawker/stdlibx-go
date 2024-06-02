@@ -1,12 +1,14 @@
 package stdtest
 
 import (
+	"context"
 	"fmt"
 	"github.com/ahawker/stdlibx-go/stdlib"
 	"math/rand"
 	"os"
 	"strconv"
 	"testing/quick"
+	"time"
 )
 
 func init() {
@@ -29,6 +31,14 @@ func init() {
 	}
 }
 
+// ErrTestParallelWithSetEnv is returned when attempting to create
+// a parallel test that overrides process environment variables.
+var ErrTestParallelWithSetEnv = stdlib.Error{
+	Code:      "parallel_with_setenv",
+	Message:   "test cannot be parallel and also modify environment variables",
+	Namespace: stdlib.ErrorNamespaceDefault,
+}
+
 // TestPrecondition is a func called prior to test execution to determine
 // if the test should be skipped and the reason for it.
 type TestPrecondition func() (bool, string)
@@ -41,6 +51,8 @@ type Logf func(format string, args ...any)
 
 // defaultTestConfig contains default values for test configuration.
 var defaultTestConfig = &TestConfig{
+	// Context is the default context for an individual test.
+	Context: context.Background(),
 	// Logf is the default func called when condition of test assertion is not met.
 	Logf: func(format string, args ...any) {
 		_, _ = fmt.Fprintf(os.Stderr, format, args...)
@@ -54,6 +66,8 @@ var defaultTestConfig = &TestConfig{
 	},
 	// QuickConfig is the default config for property testing using "testing/quick".
 	QuickConfig: &quick.Config{},
+	// Timeout is the default duration for an individual test.
+	Timeout: 5 * time.Minute,
 }
 
 // testPreconditionEnvVarSet returns true if the given environment variable name is present.
@@ -70,6 +84,7 @@ func testPreconditionEnvVarSet(name string) TestPrecondition {
 // and sane defaults.
 func NewTestConfig(options ...stdlib.Option[*TestConfig]) (*TestConfig, error) {
 	config := &TestConfig{
+		Context:      defaultTestConfig.Context,
 		Logf:         defaultTestConfig.Logf,
 		Parallel:     defaultTestConfig.Parallel,
 		Precondition: defaultTestConfig.Precondition,
@@ -77,12 +92,17 @@ func NewTestConfig(options ...stdlib.Option[*TestConfig]) (*TestConfig, error) {
 			MaxCount: defaultTestConfig.QuickConfig.MaxCount,
 			Rand:     defaultTestConfig.QuickConfig.Rand,
 		},
+		Timeout: defaultTestConfig.Timeout,
 	}
 	return stdlib.OptionApply(config, options...)
 }
 
 // TestConfig defines config options for test.
 type TestConfig struct {
+	// Context is context for an individual test.
+	Context context.Context
+	// Env contains key/value pairs to be set with 'os.SetEnv' for the scope of the test.
+	Env map[string]string
 	// Logf is called when condition of test assertion is not met.
 	Logf Logf
 	// Parallel enables/disables Parallel test execution.
@@ -92,6 +112,27 @@ type TestConfig struct {
 	Precondition TestPrecondition
 	// QuickConfig modifies of how quick test (property tests) are executed.
 	QuickConfig *quick.Config
+	// Timeout is timeout duration for test execution.
+	Timeout time.Duration
+}
+
+// WithTestContext sets the config ctx.
+func WithTestContext(ctx context.Context) stdlib.Option[*TestConfig] {
+	return func(t *TestConfig) error {
+		t.Context = ctx
+		return nil
+	}
+}
+
+// WithTestEnv sets the config env.
+func WithTestEnv(env map[string]string) stdlib.Option[*TestConfig] {
+	return func(t *TestConfig) error {
+		if t.Parallel && len(env) > 0 {
+			return ErrTestParallelWithSetEnv
+		}
+		t.Env = env
+		return nil
+	}
 }
 
 // WithTestLogf sets the config logf.
@@ -105,6 +146,9 @@ func WithTestLogf(log Logf) stdlib.Option[*TestConfig] {
 // WithTestParallel sets the config parallel.
 func WithTestParallel(parallel bool) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
+		if parallel && len(t.Env) > 0 {
+			return ErrTestParallelWithSetEnv
+		}
 		t.Parallel = parallel
 		return nil
 	}
@@ -138,6 +182,14 @@ func WithTestMaxCountScale(maxCountScale float64) stdlib.Option[*TestConfig] {
 func WithTestRand(r *rand.Rand) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.QuickConfig.Rand = r
+		return nil
+	}
+}
+
+// WithTestTimeout sets the config timeout.
+func WithTestTimeout(to time.Duration) stdlib.Option[*TestConfig] {
+	return func(t *TestConfig) error {
+		t.Timeout = to
 		return nil
 	}
 }
