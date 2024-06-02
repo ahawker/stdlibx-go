@@ -17,6 +17,7 @@ type Asserter interface {
 	OK(err error) bool
 	NotOK(err error) bool
 	Match(got, want string) bool
+	NotEqual(got, want any) bool
 	Equal(got, want any) bool
 	EqualPointer(got, want any) bool
 	EqualError(got, want error) bool
@@ -68,13 +69,13 @@ func (a *Assert) OK(err error) bool {
 func (a *Assert) NotOK(err error) bool {
 	a.tb.Helper()
 	if err == nil {
-		a.logf("\n\n\tgot:  nil\n\n\twant: error\n")
+		a.logf("\n\n\tgot:  nil\n\n\twant: %v\n", err)
 		return false
 	}
 	return true
 }
 
-// Match fails the test if got does not match want pattern.
+// Match fails the test if 'got' does not match 'want' pattern.
 func (a *Assert) Match(got, wantPattern string) bool {
 	a.tb.Helper()
 	compiled, err := regexp.Compile(wantPattern)
@@ -89,7 +90,17 @@ func (a *Assert) Match(got, wantPattern string) bool {
 	return true
 }
 
-// Equal fails the test if got is not equal to want using reflect.DeepEqual.
+// NotEqual fails the test if 'got' is equal to 'want' using reflect.DeepEqual.
+func (a *Assert) NotEqual(got, want any) bool {
+	a.tb.Helper()
+	if reflect.DeepEqual(got, want) {
+		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", got, want)
+		return false
+	}
+	return true
+}
+
+// Equal fails the test if 'got' is not equal to 'want' using reflect.DeepEqual.
 func (a *Assert) Equal(got, want any) bool {
 	a.tb.Helper()
 	if !reflect.DeepEqual(got, want) {
@@ -99,7 +110,7 @@ func (a *Assert) Equal(got, want any) bool {
 	return true
 }
 
-// EqualPointer fails the test if got is not equal to want for pointers.
+// EqualPointer fails the test if 'got' is not equal to 'want' for pointers.
 func (a *Assert) EqualPointer(got, want any) bool {
 	a.tb.Helper()
 	gotP := reflect.ValueOf(got).Pointer()
@@ -111,7 +122,7 @@ func (a *Assert) EqualPointer(got, want any) bool {
 	return true
 }
 
-// EqualError fails the test if got is not equal to want for errors.
+// EqualError fails the test if 'got' is not equal to 'want' for errors.
 func (a *Assert) EqualError(got, want error) bool {
 	a.tb.Helper()
 	if !errors.Is(got, want) && !errors.Is(want, got) {
@@ -121,7 +132,7 @@ func (a *Assert) EqualError(got, want error) bool {
 	return true
 }
 
-// EqualType fails the test if got is not equal to want for concrete types.
+// EqualType fails the test if 'got' is not equal to 'want' for concrete types.
 func (a *Assert) EqualType(got, want any) bool {
 	a.tb.Helper()
 	gotT := reflect.TypeOf(got)
@@ -133,7 +144,7 @@ func (a *Assert) EqualType(got, want any) bool {
 	return true
 }
 
-// Panic fails the test if the got function does not panic.
+// Panic fails the test if the 'got' function does not panic.
 func (a *Assert) Panic(got func()) bool {
 	a.tb.Helper()
 	defer func() {
