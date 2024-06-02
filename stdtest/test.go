@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	_ Asserter = (*Test)(nil)
-	_ Checker  = (*Test)(nil)
+	_ testing.TB = (*Test)(nil)
+	_ Asserter   = (*Test)(nil)
+	_ Checker    = (*Test)(nil)
 )
 
 // BenchmarkTest creates a new *Benchmark configured for running only "benchmark" tests
@@ -100,6 +101,7 @@ func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 			logf:   config.Logf,
 			config: config.QuickConfig,
 		},
+		Config: config,
 	}
 }
 
@@ -110,9 +112,14 @@ func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 // many common assertion patterns and preconditions for different test types (functional,
 // fuzz, or integration).
 type Test struct {
+	// TB is the golang 'testing' implementation for (T, B, F) tests.
 	testing.TB
+	// Asserter handles common test assertions.
 	Asserter
+	// Checker handles property tests.
 	Checker
+	// Config stores configuration specific to an individual test.
+	Config *TestConfig
 }
 
 // Sub runs the given function as a subtest of the current test.
