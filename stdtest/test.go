@@ -72,13 +72,6 @@ func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 		t.Fatal(err)
 	}
 
-	// Skip tests where precondition predicate is false.
-	for _, precondition := range config.Preconditions {
-		if ok, reason := precondition(); !ok {
-			t.Skip(reason)
-		}
-	}
-
 	// Parallelize test execution (multiple go-routines) when possible.
 	if config.Parallel {
 		if p, ok := t.(interface{ Parallel() }); ok {
@@ -90,6 +83,13 @@ func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	// Note: This does not work with parallel tests.
 	for k, v := range config.Env {
 		t.Setenv(k, v)
+	}
+
+	// Skip tests where precondition predicate is false.
+	for _, precondition := range config.Preconditions {
+		if ok, reason := precondition(); !ok {
+			t.Skip(reason)
+		}
 	}
 
 	return &Test{
