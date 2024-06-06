@@ -151,8 +151,7 @@ func (e Error) WithRetry(extras RetryExtras) Error {
 // AsGroup returns a *ErrorGroup containing this error and all
 // wrapped errors it contains.
 func (e Error) AsGroup() *ErrorGroup {
-	g := &ErrorGroup{}
-	g.Append(e)
+	g := NewErrorGroup(e)
 
 	err := e
 	for err.Wrapped != nil {
@@ -443,6 +442,16 @@ var (
 	_ sort.Interface = (*ErrorGroup)(nil)
 )
 
+// NewErrorGroup creates a new *ErrorGroup with sane defaults.
+func NewErrorGroup(errs ...error) *ErrorGroup {
+	eg := &ErrorGroup{
+		Errors:    make([]Error, 0, len(errs)),
+		Formatter: ErrorGroupFormatterDefault,
+	}
+	eg.Append(errs...)
+	return eg
+}
+
 // ErrorGroup stores multiple Error instances.
 //
 // TODO(ahawker) Flatten JSON output to a single error when group only has one.
@@ -585,7 +594,7 @@ type ErrorTranslate func(err error) error
 // ErrorTranslateGroup calls the given translate func for each given error
 // to build a group.
 func ErrorTranslateGroup(translate ErrorTranslate, errors ...error) *ErrorGroup {
-	g := &ErrorGroup{}
+	g := NewErrorGroup()
 	for _, err := range errors {
 		if err != nil {
 			g.Append(translate(err))
