@@ -619,6 +619,7 @@ func ErrorJoin(err error, errs ...error) *ErrorGroup {
 		eg.Append(errs...)
 		return eg
 	default:
+		eg = NewErrorGroup()
 		eg.Append(SliceFlatten([]error{err}, errs)...)
 		return eg
 	}
