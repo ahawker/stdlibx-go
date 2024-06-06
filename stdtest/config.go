@@ -49,6 +49,21 @@ type TestPrecondition func() (bool, string)
 // test to continue or immediately stop execution.
 type Logf func(format string, args ...any)
 
+// TestPreconditionEnvVarSet returns true if the given environment variable name is present.
+func TestPreconditionEnvVarSet(name string) TestPrecondition {
+	return func() (bool, string) {
+		if os.Getenv(name) == "" {
+			return false, fmt.Sprintf("%q env var required for this test type", name)
+		}
+		return true, ""
+	}
+}
+
+// testPreconditionNoOp is a dummy test precondition that is always true.
+var testPreconditionNoOp = func() (bool, string) {
+	return true, ""
+}
+
 // defaultTestConfig contains default values for test configuration.
 var defaultTestConfig = &TestConfig{
 	// Context is the default context for an individual test.
@@ -60,34 +75,22 @@ var defaultTestConfig = &TestConfig{
 	// Parallel is the default value for attempting to run tests in parallel.
 	// It can be overridden by setting the "STDLIBX_TEST_DEFAULT_PARALLEL" environment variable.
 	Parallel: false,
-	// Precondition is the default precondition check before running each test.
-	Precondition: func() (bool, string) {
-		return true, ""
-	},
+	// Preconditions being always true is the default before running each test.
+	Preconditions: []TestPrecondition{testPreconditionNoOp},
 	// QuickConfig is the default config for property testing using "testing/quick".
 	QuickConfig: &quick.Config{},
 	// Timeout is the default duration for an individual test.
 	Timeout: 5 * time.Minute,
 }
 
-// testPreconditionEnvVarSet returns true if the given environment variable name is present.
-func testPreconditionEnvVarSet(name string) TestPrecondition {
-	return func() (bool, string) {
-		if os.Getenv(name) == "" {
-			return false, fmt.Sprintf("%q environment variable required for this test type.", name)
-		}
-		return true, ""
-	}
-}
-
 // NewTestConfig creates a new *TestConfig for the given functional opts
 // and sane defaults.
 func NewTestConfig(options ...stdlib.Option[*TestConfig]) (*TestConfig, error) {
 	config := &TestConfig{
-		Context:      defaultTestConfig.Context,
-		Logf:         defaultTestConfig.Logf,
-		Parallel:     defaultTestConfig.Parallel,
-		Precondition: defaultTestConfig.Precondition,
+		Context:       defaultTestConfig.Context,
+		Logf:          defaultTestConfig.Logf,
+		Parallel:      defaultTestConfig.Parallel,
+		Preconditions: defaultTestConfig.Preconditions,
 		QuickConfig: &quick.Config{
 			MaxCount: defaultTestConfig.QuickConfig.MaxCount,
 			Rand:     defaultTestConfig.QuickConfig.Rand,
@@ -107,9 +110,9 @@ type TestConfig struct {
 	Logf Logf
 	// Parallel enables/disables Parallel test execution.
 	Parallel bool
-	// Precondition is called before test execution to determine if test should
+	// Preconditions are called before test execution to determine if test should
 	// be skipped and the reason for it.
-	Precondition TestPrecondition
+	Preconditions []TestPrecondition
 	// QuickConfig modifies of how quick test (property tests) are executed.
 	QuickConfig *quick.Config
 	// Timeout is timeout duration for test execution.
@@ -154,10 +157,10 @@ func WithTestParallel(parallel bool) stdlib.Option[*TestConfig] {
 	}
 }
 
-// WithTestPrecondition sets the config precondition.
-func WithTestPrecondition(precondition TestPrecondition) stdlib.Option[*TestConfig] {
+// WithTestPrecondition sets the config preconditions.
+func WithTestPrecondition(preconditions ...TestPrecondition) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
-		t.Precondition = precondition
+		t.Preconditions = append(t.Preconditions, preconditions...)
 		return nil
 	}
 }

@@ -16,7 +16,7 @@ var (
 func BenchmarkTest(t *testing.B, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
 	defaults := []stdlib.Option[*TestConfig]{
-		WithTestPrecondition(testPreconditionEnvVarSet("BENCHMARK_TEST")),
+		WithTestPrecondition(TestPreconditionEnvVarSet("BENCHMARK_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
@@ -27,7 +27,7 @@ func FuzzTest(t *testing.F, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
 	defaults := []stdlib.Option[*TestConfig]{
 		WithTestLogf(t.Errorf),
-		WithTestPrecondition(testPreconditionEnvVarSet("FUZZ_TEST")),
+		WithTestPrecondition(TestPreconditionEnvVarSet("FUZZ_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
@@ -37,7 +37,7 @@ func FuzzTest(t *testing.F, options ...stdlib.Option[*TestConfig]) *Test {
 func IntegrationTest(t *testing.T, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
 	defaults := []stdlib.Option[*TestConfig]{
-		WithTestPrecondition(testPreconditionEnvVarSet("INTEGRATION_TEST")),
+		WithTestPrecondition(TestPreconditionEnvVarSet("INTEGRATION_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
@@ -46,7 +46,7 @@ func IntegrationTest(t *testing.T, options ...stdlib.Option[*TestConfig]) *Test 
 func PropertyTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
 	defaults := []stdlib.Option[*TestConfig]{
-		WithTestPrecondition(testPreconditionEnvVarSet("PROPERTY_TEST")),
+		WithTestPrecondition(TestPreconditionEnvVarSet("PROPERTY_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
@@ -55,7 +55,7 @@ func PropertyTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 func UnitTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
 	defaults := []stdlib.Option[*TestConfig]{
-		WithTestPrecondition(testPreconditionEnvVarSet("UNIT_TEST")),
+		WithTestPrecondition(TestPreconditionEnvVarSet("UNIT_TEST")),
 	}
 	return newTest(t, append(defaults, options...)...)
 }
@@ -73,8 +73,10 @@ func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	}
 
 	// Skip tests where precondition predicate is false.
-	if ok, reason := config.Precondition(); !ok {
-		t.Skip(reason)
+	for _, precondition := range config.Preconditions {
+		if ok, reason := precondition(); !ok {
+			t.Skip(reason)
+		}
 	}
 
 	// Parallelize test execution (multiple go-routines) when possible.
