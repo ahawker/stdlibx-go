@@ -231,6 +231,9 @@ func (e Error) Unwrap() error {
 // allows us to avoid checking this case at every call-site; we
 // can just Wrap the error and handle it.
 func (e Error) Wrap(err error) Error {
+	if err == nil {
+		return e
+	}
 	if e.IsZero() {
 		var e2 Error
 		if errors.As(err, &e2) {
