@@ -17,7 +17,7 @@ func Must[T any](t T) T {
 func MustT[T any](v any) T {
 	t, ok := v.(T)
 	if !ok {
-		panic(fmt.Sprintf("MustT[%T] received %T value", reflect.TypeFor[T](), v))
+		panic(fmt.Sprintf("MustT[%s] received %T value", reflect.TypeFor[T](), v))
 	}
 	return t
 }
