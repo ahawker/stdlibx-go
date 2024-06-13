@@ -19,6 +19,8 @@ type Testcase[TGot any, TWant any] struct {
 	Want TWant
 	// WantErr stores the optional error expectation for the testcase.
 	WantErr error
+	// WantPanic store expectation for the test case to cause a panic.
+	WantPanic bool
 	// Options are custom options for test execution specific to this case.
 	Options []stdlib.Option[*TestConfig]
 }
@@ -37,7 +39,13 @@ func (table Table[TGot, TWant]) Run(
 	test := newTest(tb, options...)
 	for name, testcase := range table {
 		subtestFn := func(subtest *Test) {
-			testFn(subtest, testcase)
+			if testcase.WantPanic {
+				test.Panic(func() {
+					testFn(subtest, testcase)
+				})
+			} else {
+				testFn(subtest, testcase)
+			}
 		}
 		test.Sub(name, subtestFn, append(options, testcase.Options...)...)
 	}
