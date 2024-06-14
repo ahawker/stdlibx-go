@@ -10,6 +10,10 @@ import (
 
 var _ Asserter = (*Assert)(nil)
 
+// Comparer is a function that compares two values of any type and returns true
+// if they are "equal".
+type Comparer func(got, want any) bool
+
 // Asserter defines common test assertions.
 type Asserter interface {
 	True(condition bool, format string, args ...any) bool
@@ -22,6 +26,7 @@ type Asserter interface {
 	EqualPointer(got, want any) bool
 	EqualError(got, want error) bool
 	EqualType(got, want any) bool
+	EqualComparer(got, want any, cmp Comparer) bool
 	Panic(got func()) bool
 }
 
@@ -139,6 +144,16 @@ func (a *Assert) EqualType(got, want any) bool {
 	wantT := reflect.TypeOf(want)
 	if gotT != wantT {
 		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", gotT, wantT)
+		return false
+	}
+	return true
+}
+
+// EqualComparer fails the test if the comparer is not true for the given values.
+func (a *Assert) EqualComparer(got, want any, cmp Comparer) bool {
+	a.tb.Helper()
+	if !cmp(got, want) {
+		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", got, want)
 		return false
 	}
 	return true
