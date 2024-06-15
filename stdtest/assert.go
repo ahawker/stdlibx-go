@@ -163,7 +163,9 @@ func (a *Assert) EqualComparer(got, want any, cmp Comparer) bool {
 func (a *Assert) Panic(got func()) bool {
 	a.tb.Helper()
 	defer func() {
-		_ = recover()
+		if r := recover(); r != nil {
+			a.tb.Logf("\n\n\rpanic: %v", r)
+		}
 	}()
 	got()
 	a.logf("\n\n\tgot:  no panic\n\n\twant: panic\n")
