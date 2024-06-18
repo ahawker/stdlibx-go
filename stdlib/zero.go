@@ -19,3 +19,9 @@ func IsZero[T any](t T) bool {
 		return reflect.DeepEqual(t, *new(T))
 	}
 }
+
+// IsZeroAny returns true if the given value is equal to the
+// zero value of the type.
+func IsZeroAny(t any) bool {
+	return t == reflect.Zero(reflect.TypeOf(t)).Interface()
+}
