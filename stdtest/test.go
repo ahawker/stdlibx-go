@@ -124,6 +124,18 @@ type Test struct {
 	Config *TestConfig
 }
 
+// Fuzz runs the given function as a fuzztest of the current test.
+func (t *Test) Fuzz(fn any) bool {
+	switch tb := t.TB.(type) {
+	case *testing.F:
+		tb.Fuzz(fn)
+		return true
+	default:
+		t.Fatalf("fuzztest not supported for %T name=%s", t.TB, t.TB.Name())
+		return false
+	}
+}
+
 // Sub runs the given function as a subtest of the current test.
 func (t *Test) Sub(
 	name string,
@@ -140,10 +152,10 @@ func (t *Test) Sub(
 			fn(newTest(bt, options...))
 		})
 	case *testing.F:
-		t.Fatalf("subtest not support for fuzz tests name=%v", t.TB.Name())
+		t.Fatalf("subtest not supported for *testing.F name=%v", t.TB.Name())
 		return false
 	default:
-		t.Fatalf("subtest not support for unknown test type name=%s type=%T", t.TB.Name(), t.TB)
+		t.Fatalf("subtest not supported for %T name=%s", t.TB, t.TB.Name())
 		return false
 	}
 }
