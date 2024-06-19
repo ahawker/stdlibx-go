@@ -75,6 +75,11 @@ type Error struct {
 	Wrapped error `json:"-"`
 }
 
+// Key returns a value that uniquely identifies the type of error.
+func (e Error) Key() string {
+	return fmt.Sprintf("%s/%s", e.Namespace, e.Code)
+}
+
 // Equal returns true if the two Error values are equal.
 func (e Error) Equal(e2 Error) bool {
 	return e.Code == e2.Code &&
