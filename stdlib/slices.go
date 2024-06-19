@@ -2,54 +2,63 @@ package stdlib
 
 // SliceFlatten will flatten a slice of slices into a
 // single slice.
-func SliceFlatten[T any](slices ...[]T) []T {
-	var flattened []T
-	for _, slice := range slices {
-		flattened = append(flattened, slice...)
+func SliceFlatten[T any](input ...[]T) []T {
+	var output []T
+	for _, slice := range input {
+		output = append(output, slice...)
 	}
-	return flattened
+	return output
 }
 
 // SliceTypeAssert takes a slice of one type and asserts individual
 // items to the other.
-func SliceTypeAssert[TIn any, TOut any](slice []TIn) []TOut {
-	result := make([]TOut, 0, len(slice))
-	for _, item := range slice {
-		result = append(result, any(item).(TOut))
+func SliceTypeAssert[TIn any, TOut any](input []TIn) []TOut {
+	output := make([]TOut, 0, len(input))
+	for _, item := range input {
+		output = append(output, any(item).(TOut))
 	}
-	return result
+	return output
+}
+
+// SliceMap returns a slice with the results from the given 'map' function.
+func SliceMap[TIn any, TOut any](input []TIn, mapper Mapper[TIn, TOut]) []TOut {
+	output := make([]TOut, 0, len(input))
+	for _, item := range input {
+		output = append(output, mapper(item))
+	}
+	return output
 }
 
 // SliceToMap returns a map from the given slice and key function.
 func SliceToMap[K comparable, V any](input []V, key func(v V) K) map[K]V {
-	result := make(map[K]V, len(input))
+	output := make(map[K]V, len(input))
 	for _, item := range input {
-		result[key(item)] = item
+		output[key(item)] = item
 	}
-	return result
+	return output
 }
 
 // SliceFilter will return a new slice containing only items
 // from the given input that match the predicate function.
 func SliceFilter[T any](input []T, predicate Predicate[T]) []T {
-	var filtered []T
+	var output []T
 	for _, item := range input {
 		if predicate(item) {
-			filtered = append(filtered, item)
+			output = append(output, item)
 		}
 	}
-	return filtered
+	return output
 }
 
 // SliceFilterRange will return a new slice containing only items
 // from the given input ranger that match the predicate function.
 func SliceFilterRange[T any](input Ranger[T], predicate Predicate[T]) []T {
-	var filtered []T
+	var output []T
 	input.Range(func(item T) bool {
 		if predicate(item) {
-			filtered = append(filtered, item)
+			output = append(output, item)
 		}
 		return true
 	})
-	return filtered
+	return output
 }
