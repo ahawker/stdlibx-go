@@ -24,3 +24,21 @@ func MapFilterRange[K comparable, V any](input KeyedRanger[K, V], predicate Keye
 	})
 	return filtered
 }
+
+// MapKeys returns a slice of all keys for the map.
+func MapKeys[K comparable, V any](input map[K]V) []K {
+	keys := make([]K, 0, len(input))
+	for k := range input {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+// MapValues returns a slice of all values for the map.
+func MapValues[K comparable, V any](input map[K]V) []V {
+	values := make([]V, 0, len(input))
+	for _, v := range input {
+		values = append(values, v)
+	}
+	return values
+}
