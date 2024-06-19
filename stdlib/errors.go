@@ -51,6 +51,11 @@ type Causer interface {
 	Cause() error
 }
 
+// ErrorKey returns a slug that should be unique for each error (namespace + code).
+func ErrorKey(namespace, code string) string {
+	return fmt.Sprintf("%s/%s", namespace, code)
+}
+
 // Error defines a standard application error primitive.
 //
 // TODO(ahawker) Add Format interface (for pretty strings)
@@ -77,7 +82,7 @@ type Error struct {
 
 // Key returns a value that uniquely identifies the type of error.
 func (e Error) Key() string {
-	return fmt.Sprintf("%s/%s", e.Namespace, e.Code)
+	return ErrorKey(e.Namespace, e.Code)
 }
 
 // Equal returns true if the two Error values are equal.
