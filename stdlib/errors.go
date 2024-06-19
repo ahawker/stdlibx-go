@@ -588,23 +588,27 @@ func (g *ErrorGroup) Swap(i, j int) {
 	g.Errors[i], g.Errors[j] = g.Errors[j], g.Errors[i]
 }
 
+// Translate performs an in-place translation of errors
+// in the group for swapping context.
+func (g *ErrorGroup) Translate(translate ErrorTranslate) {
+	for i := 0; i < g.Len(); i++ {
+		t := translate(g.Errors[i])
+
+		// When given a generic error that isn't Error, wrap it.
+		var e Error
+		if !errors.As(t, &e) {
+			e = ErrUndefined.Wrap(t)
+		}
+
+		g.Errors[i] = e
+	}
+}
+
 // ErrorTranslate defines function that can translate errors between
 // two different contexts.
 //
 // This is commonly used to convert between domain and adapter error types.
 type ErrorTranslate func(err error) error
-
-// ErrorTranslateGroup calls the given translate func for each given error
-// to build a group.
-func ErrorTranslateGroup(translate ErrorTranslate, errors ...error) *ErrorGroup {
-	g := NewErrorGroup()
-	for _, err := range errors {
-		if err != nil {
-			g.Append(translate(err))
-		}
-	}
-	return g
-}
 
 // ErrorJoin is a helper function that will append more errors
 // onto an ErrorGroup.
