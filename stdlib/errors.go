@@ -213,7 +213,13 @@ func (e Error) Format(s fmt.State, verb rune) {
 //
 // Interface: error.
 func (e Error) Error() string {
-	return fmt.Sprintf("[%s:%s] %s ", e.Namespace, e.Code, e.Message)
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf("[%s:%s] %s ", e.Namespace, e.Code, e.Message))
+	if e.Wrapped != nil {
+		sb.WriteString(fmt.Sprintf("\n-> %s", e.Wrapped.Error()))
+	}
+	return sb.String()
 }
 
 // Is implements error equality checking.
