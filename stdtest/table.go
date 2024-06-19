@@ -36,7 +36,7 @@ func (table Table[TGot, TWant]) Run(
 	options ...stdlib.Option[*TestConfig],
 ) {
 	tb.Helper()
-	test := newTest(tb, options...)
+	test := NewTest(tb, options...)
 	for name, testcase := range table {
 		subtestFn := func(subtest *Test) {
 			if testcase.WantPanic {

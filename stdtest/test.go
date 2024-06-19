@@ -18,7 +18,7 @@ func BenchmarkTest(t *testing.B, options ...stdlib.Option[*TestConfig]) *Test {
 	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(TestPreconditionEnvVarSet("BENCHMARK_TEST")),
 	}
-	return newTest(t, append(defaults, options...)...)
+	return NewTest(t, append(defaults, options...)...)
 }
 
 // FuzzTest creates a new *Benchmark configured for running only "fuzz" tests
@@ -29,7 +29,7 @@ func FuzzTest(t *testing.F, options ...stdlib.Option[*TestConfig]) *Test {
 		WithTestLogf(t.Errorf),
 		WithTestPrecondition(TestPreconditionEnvVarSet("FUZZ_TEST")),
 	}
-	return newTest(t, append(defaults, options...)...)
+	return NewTest(t, append(defaults, options...)...)
 }
 
 // IntegrationTest creates a new *Test configured for running only "integration" tests
@@ -39,7 +39,7 @@ func IntegrationTest(t *testing.T, options ...stdlib.Option[*TestConfig]) *Test 
 	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(TestPreconditionEnvVarSet("INTEGRATION_TEST")),
 	}
-	return newTest(t, append(defaults, options...)...)
+	return NewTest(t, append(defaults, options...)...)
 }
 
 // PropertyTest creates a new *Test configured for running only "property" tests.
@@ -48,7 +48,7 @@ func PropertyTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(TestPreconditionEnvVarSet("PROPERTY_TEST")),
 	}
-	return newTest(t, append(defaults, options...)...)
+	return NewTest(t, append(defaults, options...)...)
 }
 
 // UnitTest creates a new *Test configured for running only "unit" tests.
@@ -57,11 +57,11 @@ func UnitTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	defaults := []stdlib.Option[*TestConfig]{
 		WithTestPrecondition(TestPreconditionEnvVarSet("UNIT_TEST")),
 	}
-	return newTest(t, append(defaults, options...)...)
+	return NewTest(t, append(defaults, options...)...)
 }
 
-// newTest creates a new *Test with the given options.
-func newTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
+// NewTest creates a new *Test with the given options.
+func NewTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 	t.Helper()
 
 	defaults := []stdlib.Option[*TestConfig]{
@@ -145,11 +145,11 @@ func (t *Test) Sub(
 	switch tb := t.TB.(type) {
 	case *testing.T:
 		return tb.Run(name, func(st *testing.T) {
-			fn(newTest(st, options...))
+			fn(NewTest(st, options...))
 		})
 	case *testing.B:
 		return tb.Run(name, func(bt *testing.B) {
-			fn(newTest(bt, options...))
+			fn(NewTest(bt, options...))
 		})
 	case *testing.F:
 		t.Fatalf("subtest not supported for *testing.F name=%v", t.TB.Name())
