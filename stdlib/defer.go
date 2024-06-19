@@ -1,8 +1,16 @@
 package stdlib
 
-// Defer is a helper for deferring a function call that can return an error
+// Defer is a helper for capturing errors from calls inside a 'defer'.
+func Defer(err *error, errs ...error) {
+	if err == nil {
+		*err = Error{}
+	}
+	*err = ErrorJoin(*err, errs...).ErrorOrNil()
+}
+
+// DeferCloser is a helper for deferring a function call (closer) that can return an error
 // when in a function context that can return multiple errors.
-func Defer(err *error, fn func() error) {
+func DeferCloser(err *error, fn func() error) {
 	if err == nil {
 		*err = Error{}
 	}
