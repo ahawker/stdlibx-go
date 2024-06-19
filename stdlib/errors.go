@@ -455,6 +455,14 @@ func NewErrorGroup(errs ...error) *ErrorGroup {
 	return eg
 }
 
+// NewTranslatedErrorGroup creates a new *ErrorGroup with sane defaults
+// and translated errors.
+func NewTranslatedErrorGroup(translate ErrorTranslate, errs ...error) *ErrorGroup {
+	eg := NewErrorGroup(errs...)
+	eg.Translate(translate)
+	return eg
+}
+
 // ErrorGroup stores multiple Error instances.
 //
 // TODO(ahawker) Flatten JSON output to a single error when group only has one.
