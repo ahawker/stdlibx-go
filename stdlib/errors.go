@@ -228,11 +228,6 @@ func (e Error) Error() string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("[%s:%s] %s", e.Namespace, e.Code, e.Message))
-	if e.Extras.Tags != nil {
-		for i := 0; i < len(e.Extras.Tags); i += 2 {
-			sb.WriteString(fmt.Sprintf(" %s=%v", e.Extras.Tags[i], e.Extras.Tags[i+1]))
-		}
-	}
 	if e.Wrapped != nil {
 		sb.WriteString(fmt.Sprintf("\n-> %s", e.Wrapped.Error()))
 	}
