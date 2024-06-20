@@ -158,11 +158,11 @@ func (e Error) WithRetry(extras RetryExtras) Error {
 	}
 }
 
-// WithTags returns a new copy of the Error with the given tags added.
-func (e Error) WithTags(tags ...string) Error {
+// WithTag returns a new copy of the Error with the given tags added.
+func (e Error) WithTag(tags ...string) Error {
 	return Error{
 		Code:      e.Code,
-		Extras:    e.Extras.WithTags(tags...),
+		Extras:    e.Extras.WithTag(tags...),
 		Flags:     e.Flags,
 		Message:   e.Message,
 		Namespace: e.Namespace,
@@ -364,13 +364,13 @@ func (e ErrorExtras) WithRetryExtras(extras RetryExtras) ErrorExtras {
 	}
 }
 
-// WithTags returns a new copy of the ErrorExtras with the given tags set.
-func (e ErrorExtras) WithTags(tags ...string) ErrorExtras {
+// WithTag returns a new copy of the ErrorExtras with the given tags set.
+func (e ErrorExtras) WithTag(tags ...string) ErrorExtras {
 	return ErrorExtras{
 		Debug: e.Debug,
 		Help:  e.Help,
 		Retry: e.Retry,
-		Tags:  tags,
+		Tags:  append(e.Tags, tags...),
 	}
 }
 
