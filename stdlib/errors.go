@@ -158,6 +158,18 @@ func (e Error) WithRetry(extras RetryExtras) Error {
 	}
 }
 
+// WithTags returns a new copy of the Error with the given tags added.
+func (e Error) WithTags(tags ...string) Error {
+	return Error{
+		Code:      e.Code,
+		Extras:    e.Extras.WithTags(tags...),
+		Flags:     e.Flags,
+		Message:   e.Message,
+		Namespace: e.Namespace,
+		Wrapped:   e.Wrapped,
+	}
+}
+
 // AsGroup returns a *ErrorGroup containing this error and all
 // wrapped errors it contains.
 func (e Error) AsGroup() *ErrorGroup {
@@ -215,7 +227,10 @@ func (e Error) Format(s fmt.State, verb rune) {
 func (e Error) Error() string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("[%s:%s] %s ", e.Namespace, e.Code, e.Message))
+	sb.WriteString(fmt.Sprintf("[%s:%s] %s", e.Namespace, e.Code, e.Message))
+	if e.Extras.Tags != nil {
+		sb.WriteString(fmt.Sprintf(" %v", e.Extras.Tags))
+	}
 	if e.Wrapped != nil {
 		sb.WriteString(fmt.Sprintf("\n-> %s", e.Wrapped.Error()))
 	}
@@ -313,6 +328,8 @@ type ErrorExtras struct {
 	Help HelpExtras `json:"help,omitempty"`
 	// Retry information regarding the failed operation.
 	Retry RetryExtras `json:"retry,omitempty"`
+	// Tags are additional labels that can be used to categorize errors.
+	Tags []string `json:"tags,omitempty"`
 }
 
 // WithDebugExtras returns a new copy of the ErrorExtras with the given debug info set.
@@ -321,6 +338,7 @@ func (e ErrorExtras) WithDebugExtras(extras DebugExtras) ErrorExtras {
 		Debug: extras,
 		Help:  e.Help,
 		Retry: e.Retry,
+		Tags:  e.Tags,
 	}
 }
 
@@ -330,6 +348,7 @@ func (e ErrorExtras) WithHelpExtras(extras HelpExtras) ErrorExtras {
 		Debug: e.Debug,
 		Help:  extras,
 		Retry: e.Retry,
+		Tags:  e.Tags,
 	}
 }
 
@@ -339,12 +358,23 @@ func (e ErrorExtras) WithRetryExtras(extras RetryExtras) ErrorExtras {
 		Debug: e.Debug,
 		Help:  e.Help,
 		Retry: extras,
+		Tags:  e.Tags,
+	}
+}
+
+// WithTags returns a new copy of the ErrorExtras with the given tags set.
+func (e ErrorExtras) WithTags(tags ...string) ErrorExtras {
+	return ErrorExtras{
+		Debug: e.Debug,
+		Help:  e.Help,
+		Retry: e.Retry,
+		Tags:  tags,
 	}
 }
 
 // IsZero returns true if the ErrorExtras object is the zero/empty struct value.
 func (e ErrorExtras) IsZero() bool {
-	return e.Debug.IsZero() && e.Help.IsZero() && e.Retry.IsZero()
+	return e.Debug.IsZero() && e.Help.IsZero() && e.Retry.IsZero() && len(e.Tags) == 0
 }
 
 // DebugExtras contains helpful information for debugging the error.
