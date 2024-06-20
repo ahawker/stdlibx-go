@@ -91,7 +91,9 @@ func (e Error) Equal(e2 Error) bool {
 		e.Message == e2.Message &&
 		e.Namespace == e2.Namespace &&
 		e.Flags == e2.Flags &&
-		reflect.DeepEqual(e.Extras, e2.Extras)
+		reflect.DeepEqual(e.Extras.Debug, e2.Extras.Debug) &&
+		reflect.DeepEqual(e.Extras.Help, e2.Extras.Help) &&
+		reflect.DeepEqual(e.Extras.Retry, e2.Extras.Retry)
 }
 
 // IsZero returns true if the Error is an empty/zero value.
@@ -611,11 +613,7 @@ func (g *ErrorGroup) Unwrap() error {
 //
 // Interface: error.
 func (g *ErrorGroup) Error() string {
-	formatter := g.Formatter
-	if formatter == nil {
-		formatter = ErrorGroupFormatterDefault
-	}
-	return formatter(g.Errors)
+	return g.Formatter(g.Errors)
 }
 
 // Len returns the number of errors in the group.
