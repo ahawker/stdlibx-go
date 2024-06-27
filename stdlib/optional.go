@@ -1,13 +1,13 @@
 package stdlib
 
 // Some creates an Optional with a value.
-func Some[T any](v T) Optional[T] {
-	return Optional[T]{value: v, def: *new(T), changed: true}
+func Some[T any](v T) *Optional[T] {
+	return &Optional[T]{value: v, def: *new(T), changed: true}
 }
 
 // Default creates an Optional with an empty value and distinct default value.
-func Default[T any](v T) Optional[T] {
-	return Optional[T]{value: *new(T), def: v, changed: false}
+func Default[T any](v T) *Optional[T] {
+	return &Optional[T]{value: *new(T), def: v, changed: false}
 }
 
 // Optional wraps a value of type `T` tracks a default value
