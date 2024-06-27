@@ -8,7 +8,7 @@ import (
 // that cannot be converted.
 var ErrTypeAssertionFailed = Error{
 	Code:      "type_assertion_failed",
-	Message:   "Cannot type assert value",
+	Message:   "type assertion failed",
 	Namespace: ErrorNamespaceDefault,
 }
 
