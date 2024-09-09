@@ -33,6 +33,15 @@ func MustE[T any](fn func() (T, error)) T {
 	return Must[T](t)
 }
 
+// MustMapStringAny returns the map[string]any of the given value and panics if it cannot.
+func MustMapStringAny[T any](value T) map[string]any {
+	v, err := ToMapStringAny[T](value)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // MustString returns the string representation of the given value and panics if it cannot.
 func MustString[T any](value T) string {
 	v, err := ToString[T](value)

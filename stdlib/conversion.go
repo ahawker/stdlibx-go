@@ -2,6 +2,7 @@ package stdlib
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -12,6 +13,30 @@ var ErrTypeConversionFailed = Error{
 	Code:      "type_conversion_failed",
 	Message:   "type conversion failed",
 	Namespace: ErrorNamespaceDefault,
+}
+
+// ToMapStringAny returns the map[string]any representation of the given value and errors if it cannot.
+func ToMapStringAny[T any](value T) (map[string]any, error) {
+	switch v := any(value).(type) {
+	case map[string]any:
+		return v, nil
+	default:
+		rv := reflect.ValueOf(value)
+		switch rv.Kind() {
+		case reflect.Map:
+			result := make(map[string]any, rv.Len())
+			for _, mk := range rv.MapKeys() {
+				mapKey, err := ToString[any](mk.Interface())
+				if err != nil {
+					return nil, ErrTypeConversionFailed.Wrapf("value_type=%T desired_type=string", mk.Interface())
+				}
+				result[mapKey] = rv.MapIndex(mk).Interface()
+			}
+			return result, nil
+		default:
+			return nil, ErrTypeConversionFailed.Wrapf("value_type=%T desired_type=map[string]any", value)
+		}
+	}
 }
 
 // ToString returns the string representation of the given value and errors if it cannot.
