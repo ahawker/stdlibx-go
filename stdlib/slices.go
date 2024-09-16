@@ -10,6 +10,15 @@ func SliceFlatten[T any](input ...[]T) []T {
 	return output
 }
 
+// SliceSet returns a set from the given slice.
+func SliceSet[T comparable](input []T) map[T]struct{} {
+	var output map[T]struct{}
+	for _, item := range input {
+		output[item] = struct{}{}
+	}
+	return output
+}
+
 // SliceTypeAssert takes a slice of one type and asserts individual
 // items to the other.
 func SliceTypeAssert[TIn any, TOut any](input []TIn) []TOut {
