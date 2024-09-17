@@ -3,6 +3,7 @@ package stdtest
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"regexp"
 	"testing"
@@ -27,6 +28,7 @@ type Asserter interface {
 	EqualError(got, want error) bool
 	EqualType(got, want any) bool
 	EqualComparer(got, want any, cmp Comparer) bool
+	EqualFloat(got, want, epsilon float64) bool
 	Panic(got func()) bool
 }
 
@@ -154,6 +156,16 @@ func (a *Assert) EqualComparer(got, want any, cmp Comparer) bool {
 	a.tb.Helper()
 	if !cmp(got, want) {
 		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", got, want)
+		return false
+	}
+	return true
+}
+
+// EqualFloat fails the test if 'got' is not equal to 'want' for float64 values.
+func (a *Assert) EqualFloat(got, want, epsilon float64) bool {
+	a.tb.Helper()
+	if math.Abs(got-want) > epsilon {
+		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n\n\tepsilon: %#v", got, want, epsilon)
 		return false
 	}
 	return true
