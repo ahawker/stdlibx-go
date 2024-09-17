@@ -85,6 +85,12 @@ func NewTest(t testing.TB, options ...stdlib.Option[*TestConfig]) *Test {
 		t.Setenv(k, v)
 	}
 
+	// Skip the test if a reason is set.
+	// Commonly used for tests that are not yet implemented.
+	if config.Skip != "" {
+		t.Skip(config.Skip)
+	}
+
 	// Skip tests where precondition predicate is false.
 	for _, precondition := range config.Preconditions {
 		if ok, reason := precondition(); !ok {

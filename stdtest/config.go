@@ -79,6 +79,8 @@ var defaultTestConfig = &TestConfig{
 	Preconditions: []TestPrecondition{testPreconditionNoOp},
 	// QuickConfig is the default config for property testing using "testing/quick".
 	QuickConfig: &quick.Config{},
+	// Skip is the default reason for skipping a test.
+	Skip: "",
 	// Timeout is the default duration for an individual test.
 	Timeout: 5 * time.Minute,
 }
@@ -95,6 +97,7 @@ func NewTestConfig(options ...stdlib.Option[*TestConfig]) (*TestConfig, error) {
 			MaxCount: defaultTestConfig.QuickConfig.MaxCount,
 			Rand:     defaultTestConfig.QuickConfig.Rand,
 		},
+		Skip:    defaultTestConfig.Skip,
 		Timeout: defaultTestConfig.Timeout,
 	}
 	return stdlib.OptionApply(config, options...)
@@ -115,6 +118,8 @@ type TestConfig struct {
 	Preconditions []TestPrecondition
 	// QuickConfig modifies of how quick test (property tests) are executed.
 	QuickConfig *quick.Config
+	// Skip test for this reason.
+	Skip string
 	// Timeout is timeout duration for test execution.
 	Timeout time.Duration
 }
@@ -185,6 +190,14 @@ func WithTestMaxCountScale(maxCountScale float64) stdlib.Option[*TestConfig] {
 func WithTestRand(r *rand.Rand) stdlib.Option[*TestConfig] {
 	return func(t *TestConfig) error {
 		t.QuickConfig.Rand = r
+		return nil
+	}
+}
+
+// WithTestSkip sets the config skip reason.
+func WithTestSkip(skip string) stdlib.Option[*TestConfig] {
+	return func(t *TestConfig) error {
+		t.Skip = skip
 		return nil
 	}
 }
