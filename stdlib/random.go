@@ -9,8 +9,11 @@ import (
 	"time"
 )
 
-// RNG a default global random number generator.
-var RNG *rand.Rand
+// Rand a default global random number generator.
+var (
+	Rand   *rand.Rand
+	Source rand.Source
+)
 
 const (
 	alphabet     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -18,19 +21,13 @@ const (
 	alphaNumeric = alphabet + digits
 )
 
-const lowerStr = "abcdefghijklmnopqrstuvwxyz"
-const upperStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const numericStr = "0123456789"
-const specialStr = "@#$%&?|!(){}<>=*+-_:;,."
-const specialSafeStr = "!@.-_*" // https://github.com/1Password/spg/pull/22
-const spaceStr = " "
-const allStr = lowerStr + upperStr + numericStr + specialStr + spaceStr
-
 func init() {
 	if seed, ok := os.LookupEnv("STDLIB_RANDOM_SEED"); ok {
-		RNG = rand.New(rand.NewSource(int64(MustInt(seed))))
+		Source = rand.NewSource(int64(MustInt(seed)))
+		Rand = rand.New(Source)
 	} else {
-		RNG = rand.New(rand.NewSource(time.Now().UnixNano()))
+		Source = rand.NewSource(time.Now().UnixNano())
+		Rand = rand.New(Source)
 	}
 }
 
