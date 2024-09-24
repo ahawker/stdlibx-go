@@ -16,12 +16,16 @@ const (
 	FakeStrategyUnspecified FakeStrategy = "unspecified"
 	// FakeStrategyRandom is a FakeStrategy of type random.
 	FakeStrategyRandom FakeStrategy = "random"
-	// FakeStrategyRandomSelection is a FakeStrategy of type random_selection.
-	FakeStrategyRandomSelection FakeStrategy = "random_selection"
-	// FakeStrategyNormalDistribution is a FakeStrategy of type normal_distribution.
-	FakeStrategyNormalDistribution FakeStrategy = "normal_distribution"
-	// FakeStrategyUniformDistribution is a FakeStrategy of type uniform_distribution.
-	FakeStrategyUniformDistribution FakeStrategy = "uniform_distribution"
+	// FakeStrategyRandomRange is a FakeStrategy of type random_range.
+	FakeStrategyRandomRange FakeStrategy = "random_range"
+	// FakeStrategyRandomPattern is a FakeStrategy of type random_pattern.
+	FakeStrategyRandomPattern FakeStrategy = "random_pattern"
+	// FakeStrategyRandomSelect is a FakeStrategy of type random_select.
+	FakeStrategyRandomSelect FakeStrategy = "random_select"
+	// FakeStrategyDistributionNormal is a FakeStrategy of type distribution_normal.
+	FakeStrategyDistributionNormal FakeStrategy = "distribution_normal"
+	// FakeStrategyDistributionUniform is a FakeStrategy of type distribution_uniform.
+	FakeStrategyDistributionUniform FakeStrategy = "distribution_uniform"
 	// FakeStrategyStateful is a FakeStrategy of type stateful.
 	FakeStrategyStateful FakeStrategy = "stateful"
 )
@@ -31,9 +35,11 @@ var ErrInvalidFakeStrategy = fmt.Errorf("not a valid FakeStrategy, try [%s]", st
 var _FakeStrategyNames = []string{
 	string(FakeStrategyUnspecified),
 	string(FakeStrategyRandom),
-	string(FakeStrategyRandomSelection),
-	string(FakeStrategyNormalDistribution),
-	string(FakeStrategyUniformDistribution),
+	string(FakeStrategyRandomRange),
+	string(FakeStrategyRandomPattern),
+	string(FakeStrategyRandomSelect),
+	string(FakeStrategyDistributionNormal),
+	string(FakeStrategyDistributionUniform),
 	string(FakeStrategyStateful),
 }
 
@@ -59,9 +65,11 @@ func (x FakeStrategy) IsValid() bool {
 var _FakeStrategyValue = map[string]FakeStrategy{
 	"unspecified":          FakeStrategyUnspecified,
 	"random":               FakeStrategyRandom,
-	"random_selection":     FakeStrategyRandomSelection,
-	"normal_distribution":  FakeStrategyNormalDistribution,
-	"uniform_distribution": FakeStrategyUniformDistribution,
+	"random_range":         FakeStrategyRandomRange,
+	"random_pattern":       FakeStrategyRandomPattern,
+	"random_select":        FakeStrategyRandomSelect,
+	"distribution_normal":  FakeStrategyDistributionNormal,
+	"distribution_uniform": FakeStrategyDistributionUniform,
 	"stateful":             FakeStrategyStateful,
 }
 
@@ -81,6 +89,67 @@ func (x FakeStrategy) MarshalText() ([]byte, error) {
 // UnmarshalText implements the text unmarshaller method.
 func (x *FakeStrategy) UnmarshalText(text []byte) error {
 	tmp, err := ParseFakeStrategy(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+const (
+	// FakeWellKnownTypeUnspecified is a FakeWellKnownType of type unspecified.
+	FakeWellKnownTypeUnspecified FakeWellKnownType = "unspecified"
+	// FakeWellKnownTypeEmail is a FakeWellKnownType of type email.
+	FakeWellKnownTypeEmail FakeWellKnownType = "email"
+)
+
+var ErrInvalidFakeWellKnownType = fmt.Errorf("not a valid FakeWellKnownType, try [%s]", strings.Join(_FakeWellKnownTypeNames, ", "))
+
+var _FakeWellKnownTypeNames = []string{
+	string(FakeWellKnownTypeUnspecified),
+	string(FakeWellKnownTypeEmail),
+}
+
+// FakeWellKnownTypeNames returns a list of possible string values of FakeWellKnownType.
+func FakeWellKnownTypeNames() []string {
+	tmp := make([]string, len(_FakeWellKnownTypeNames))
+	copy(tmp, _FakeWellKnownTypeNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x FakeWellKnownType) String() string {
+	return string(x)
+}
+
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
+func (x FakeWellKnownType) IsValid() bool {
+	_, err := ParseFakeWellKnownType(string(x))
+	return err == nil
+}
+
+var _FakeWellKnownTypeValue = map[string]FakeWellKnownType{
+	"unspecified": FakeWellKnownTypeUnspecified,
+	"email":       FakeWellKnownTypeEmail,
+}
+
+// ParseFakeWellKnownType attempts to convert a string to a FakeWellKnownType.
+func ParseFakeWellKnownType(name string) (FakeWellKnownType, error) {
+	if x, ok := _FakeWellKnownTypeValue[name]; ok {
+		return x, nil
+	}
+	return FakeWellKnownType(""), fmt.Errorf("%s is %w", name, ErrInvalidFakeWellKnownType)
+}
+
+// MarshalText implements the text marshaller method.
+func (x FakeWellKnownType) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *FakeWellKnownType) UnmarshalText(text []byte) error {
+	tmp, err := ParseFakeWellKnownType(string(text))
 	if err != nil {
 		return err
 	}
