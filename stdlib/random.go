@@ -43,6 +43,18 @@ func RandomSelection[T any](rng *rand.Rand, items []T) T {
 	}
 }
 
+// RandomExcluding generates a random value that is not in the excluded set.
+//
+// Note: Depending on the content of the excluded set, this function may be extremely inefficient.
+func RandomExcluding[T comparable](fn func() T, exclude map[T]struct{}) T {
+	for {
+		value := fn()
+		if _, ok := exclude[value]; !ok {
+			return value
+		}
+	}
+}
+
 // RandomNumber returns a random number between primitive value min & max.
 func RandomNumber[T constraints.Integer | constraints.Float](rng *rand.Rand) T {
 	switch t := any(*new(T)).(type) {
