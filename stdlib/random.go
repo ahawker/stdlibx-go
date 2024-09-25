@@ -13,6 +13,7 @@ import (
 var (
 	Rand   *rand.Rand
 	Source rand.Source
+	Seed   int64
 )
 
 const (
@@ -22,11 +23,13 @@ const (
 )
 
 func init() {
-	if seed, ok := os.LookupEnv("STDLIB_RANDOM_SEED"); ok {
-		Source = rand.NewSource(int64(MustInt(seed)))
+	if s, ok := os.LookupEnv("STDLIB_RANDOM_SEED"); ok {
+		Seed = int64(MustInt(s))
+		Source = rand.NewSource(Seed)
 		Rand = rand.New(Source)
 	} else {
-		Source = rand.NewSource(time.Now().UnixNano())
+		Seed = time.Now().UnixNano()
+		Source = rand.NewSource(Seed)
 		Rand = rand.New(Source)
 	}
 }
