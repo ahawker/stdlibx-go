@@ -12,7 +12,7 @@ func SliceFlatten[T any](input ...[]T) []T {
 
 // SliceSet returns a set from the given slice.
 func SliceSet[T comparable](input []T) map[T]struct{} {
-	var output map[T]struct{}
+	output := make(map[T]struct{}, len(input))
 	for _, item := range input {
 		output[item] = struct{}{}
 	}
