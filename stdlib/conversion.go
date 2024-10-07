@@ -72,6 +72,8 @@ func ToString[T any](value T) (string, error) {
 	switch v := any(value).(type) {
 	case string:
 		return v, nil
+	case fmt.Stringer:
+		return v.String(), nil
 	default:
 		return fmt.Sprintf("%v", v), nil
 	}

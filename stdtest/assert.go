@@ -3,6 +3,7 @@ package stdtest
 import (
 	"errors"
 	"fmt"
+	"github.com/ahawker/stdlibx-go/stdlib"
 	"math"
 	"reflect"
 	"regexp"
@@ -29,6 +30,8 @@ type Asserter interface {
 	EqualType(got, want any) bool
 	EqualComparer(got, want any, cmp Comparer) bool
 	EqualFloat(got, want, epsilon float64) bool
+	EqualPattern(got any, want string) bool
+	EqualRegex(got any, want *regexp.Regexp) bool
 	Panic(got func()) bool
 }
 
@@ -166,6 +169,23 @@ func (a *Assert) EqualFloat(got, want, epsilon float64) bool {
 	a.tb.Helper()
 	if math.Abs(got-want) > epsilon {
 		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n\n\tepsilon: %#v", got, want, epsilon)
+		return false
+	}
+	return true
+}
+
+// EqualPattern fails the test if 'got' does not match 'want' regular expression pattern.
+func (a *Assert) EqualPattern(got any, want string) bool {
+	a.tb.Helper()
+	return a.EqualRegex(got, regexp.MustCompile(want))
+}
+
+// EqualRegex fails the test if 'got' does not match 'want' regular expression.
+func (a *Assert) EqualRegex(got any, want *regexp.Regexp) bool {
+	a.tb.Helper()
+	gotStr := stdlib.MustE(func() (string, error) { return stdlib.ToString(got) })
+	if !want.MatchString(gotStr) {
+		a.logf("\n\n\tgot:  %#v\n\n\twant: %#v\n", gotStr, want.String())
 		return false
 	}
 	return true
