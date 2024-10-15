@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+var TimestampLayouts = [3]string{
+	time.Layout,
+	time.RFC3339,
+	time.RFC3339Nano,
+}
+
 // ErrTypeConversionFailed is returned when attempting a type conversion that
 // cannot be performed.
 var ErrTypeConversionFailed = Error{
@@ -137,4 +143,33 @@ func ToDuration[T any](value T) (time.Duration, error) {
 	default:
 		return 0, ErrTypeConversionFailed.Wrapf("value_type=%T desired_type=time.Duration", value)
 	}
+}
+
+// ToTime returns the time.Time representation of the given value and errors if it cannot.
+func ToTime[T any](value T) (time.Time, error) {
+	switch v := any(value).(type) {
+	case time.Time:
+		return v, nil
+	case float64:
+		return unixMillisToTime(int64(v)), nil
+	case int64:
+		return unixMillisToTime(v), nil
+	case string:
+		for _, layout := range TimestampLayouts {
+			ts, err := time.Parse(layout, v)
+			if err == nil {
+				return ts, nil
+			}
+		}
+		return time.Unix(0, 0), ErrTypeConversionFailed.Wrapf("value_type=%T desired_type=time.Time", value)
+	default:
+		return time.Unix(0, 0), ErrTypeConversionFailed.Wrapf("value_type=%T desired_type=time.Time", value)
+	}
+}
+
+// unixMillisToTime makes time.Time from milliseconds since unix epoch.
+func unixMillisToTime(msUnix int64) time.Time {
+	secs := int64(msUnix) / 1000
+	nsecs := (msUnix % secs) * int64(time.Millisecond)
+	return time.Unix(secs, nsecs).UTC()
 }
