@@ -88,7 +88,7 @@ func MustDuration[T any](value T) time.Duration {
 }
 
 // MustTime returns the time.Time representation of the given value and panics if it cannot.
-func MustTime[T any](value T) time.Duration {
+func MustTime[T any](value T) time.Time {
 	v, err := ToTime[T](value)
 	if err != nil {
 		panic(err)
