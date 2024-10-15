@@ -1,4 +1,4 @@
-//go:generate go run github.com/abice/go-enum --marshal --names
+//go:generate go-enum --marshal --names
 package stdlib
 
 import (
