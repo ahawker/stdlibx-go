@@ -27,3 +27,12 @@ func DeferCall(err *error, fn func() error) {
 	}
 	*err = ErrorJoin(*err, fn()).ErrorOrNil()
 }
+
+// DeferCloserToGroup is a helper for deferring a closer to a group.
+func DeferCloserToGroup(c **CloserGroup, closer ...io.Closer) io.Closer {
+	if c == nil {
+		*c = NewCloserGroup()
+	}
+	*c = CloserJoin(*c, closer...)
+	return *c
+}
