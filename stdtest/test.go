@@ -2,6 +2,7 @@ package stdtest
 
 import (
 	"github.com/ahawker/stdlibx-go/stdlib"
+	"io"
 	"testing"
 )
 
@@ -140,6 +141,20 @@ func (t *Test) Fuzz(fn any) bool {
 		t.Fatalf("fuzztest not supported for %T name=%s", t.TB, t.TB.Name())
 		return false
 	}
+}
+
+// Close registers a cleanup configuration for the closer.
+func (t *Test) Close(closer io.Closer) {
+	t.Helper()
+
+	if closer == nil {
+		return
+	}
+	t.Cleanup(func() {
+		if err := closer.Close(); err != nil {
+			t.Fatalf("failed to close: %v", err)
+		}
+	})
 }
 
 // Sub runs the given function as a subtest of the current test.

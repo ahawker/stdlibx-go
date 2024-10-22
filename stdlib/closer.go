@@ -4,6 +4,15 @@ import (
 	"io"
 )
 
+var _ io.Closer = CloserFn(nil)
+
+// CloserFn is a function that can be used to close resources.
+type CloserFn func() error
+
+func (fn CloserFn) Close() error {
+	return fn()
+}
+
 // NewCloserGroup creates a new *CloserGroup with sane defaults.
 func NewCloserGroup(closers ...io.Closer) *CloserGroup {
 	cg := &CloserGroup{
