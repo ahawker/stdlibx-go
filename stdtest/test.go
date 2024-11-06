@@ -143,8 +143,8 @@ func (t *Test) Fuzz(fn any) bool {
 	}
 }
 
-// Close registers a cleanup configuration for the closer.
-func (t *Test) Close(closer io.Closer) {
+// Closeup registers a cleanup configuration for the closer.
+func (t *Test) Closeup(closer io.Closer) {
 	t.Helper()
 
 	if closer == nil {
