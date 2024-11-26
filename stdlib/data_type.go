@@ -693,13 +693,17 @@ func Date(value any) (time.Time, error) {
 	case time.Time:
 		return v, nil
 	case string:
-		for _, layout := range TimestampLayouts {
-			parsed, err := time.Parse(layout, v)
-			if err == nil {
-				return truncate(parsed), nil
-			}
+		parsed, err := time.Parse("2006-01-02", v)
+		if err != nil {
+			return zero, err
 		}
-		return zero, ErrConversionNotSupported.Wrapf("from=%T to=date value=%v", value, value)
+		return truncate(parsed), nil
+	case int8, int16, int32, int64, int, uint8, uint16, uint32, uint64, uint:
+		i64, err := Int64(v)
+		if err != nil {
+			return zero, err
+		}
+		return truncate(unixSeconds(i64)), nil
 	default:
 		return zero, ErrConversionNotSupported.Wrapf("from=%T to=date value=%v", value, value)
 	}
