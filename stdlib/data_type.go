@@ -691,7 +691,7 @@ func Date(value any) (time.Time, error) {
 
 	switch v := value.(type) {
 	case time.Time:
-		return v, nil
+		return truncate(v), nil
 	case string:
 		parsed, err := time.Parse("2006-01-02", v)
 		if err != nil {
@@ -718,7 +718,7 @@ func TimestampS(value any) (time.Time, error) {
 
 	switch v := value.(type) {
 	case time.Time:
-		return v, nil
+		return truncate(v), nil
 	case string:
 		for _, layout := range TimestampLayouts {
 			parsed, err := time.Parse(layout, v)
@@ -748,7 +748,7 @@ func TimestampMs(value any) (time.Time, error) {
 
 	switch v := value.(type) {
 	case time.Time:
-		return v, nil
+		return truncate(v), nil
 	case string:
 		for _, layout := range TimestampLayouts {
 			parsed, err := time.Parse(layout, v)
