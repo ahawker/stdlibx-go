@@ -518,12 +518,12 @@ func Uint64(value any) (uint64, error) {
 		}
 		return uint64(v), nil
 	case int:
-		if v < 0 || v > math.MaxUint64 {
+		if v < 0 {
 			return zero, ErrPrecisionLoss.Wrapf("from=%T to=uint64 value=%v", v, v)
 		}
 		return uint64(v), nil
 	case int64:
-		if v < 0 || v > math.MaxUint64 {
+		if v < 0 {
 			return zero, ErrPrecisionLoss.Wrapf("from=%T to=uint64 value=%v", v, v)
 		}
 		return uint64(v), nil
@@ -559,12 +559,9 @@ func Float32(value any) (float32, error) {
 	case int32:
 		return float32(v), nil
 	case int:
-		if v < 0 || v > math.MaxFloat32 {
-			return zero, ErrPrecisionLoss.Wrapf("from=%T to=float32 value=%v", v, v)
-		}
 		return float32(v), nil
 	case int64:
-		if v < 0 || v > int64(math.Floor(math.MaxFloat32)) {
+		if v > int64(math.Floor(math.MaxFloat32)) {
 			return zero, ErrPrecisionLoss.Wrapf("from=%T to=float32 value=%v", v, v)
 		}
 		return float32(v), nil
