@@ -42,10 +42,14 @@ const (
 	DataTypeUtf8 DataType = "utf8"
 	// DataTypeDate is a DataType of type date.
 	DataTypeDate DataType = "date"
+	// DataTypeTimestamp is a DataType of type timestamp.
+	DataTypeTimestamp DataType = "timestamp"
 	// DataTypeTimestampS is a DataType of type timestamp_s.
 	DataTypeTimestampS DataType = "timestamp_s"
 	// DataTypeTimestampMs is a DataType of type timestamp_ms.
 	DataTypeTimestampMs DataType = "timestamp_ms"
+	// DataTypeList is a DataType of type list.
+	DataTypeList DataType = "list"
 )
 
 var ErrInvalidDataType = fmt.Errorf("not a valid DataType, try [%s]", strings.Join(_DataTypeNames, ", "))
@@ -66,8 +70,10 @@ var _DataTypeNames = []string{
 	string(DataTypeBytes),
 	string(DataTypeUtf8),
 	string(DataTypeDate),
+	string(DataTypeTimestamp),
 	string(DataTypeTimestampS),
 	string(DataTypeTimestampMs),
+	string(DataTypeList),
 }
 
 // DataTypeNames returns a list of possible string values of DataType.
@@ -105,8 +111,10 @@ var _DataTypeValue = map[string]DataType{
 	"bytes":        DataTypeBytes,
 	"utf8":         DataTypeUtf8,
 	"date":         DataTypeDate,
+	"timestamp":    DataTypeTimestamp,
 	"timestamp_s":  DataTypeTimestampS,
 	"timestamp_ms": DataTypeTimestampMs,
+	"list":         DataTypeList,
 }
 
 // ParseDataType attempts to convert a string to a DataType.

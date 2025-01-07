@@ -30,8 +30,10 @@ float64,
 bytes,
 utf8,
 date,
+timestamp,
 timestamp_s,
 timestamp_ms,
+list
 ).
 */
 type DataType string
@@ -46,6 +48,11 @@ var ErrConversionNotSupported = Error{
 	Code:      "conversion_not_supported",
 	Message:   "data type could not be converted safety",
 	Namespace: "com.github.ahawker.stdlib",
+}
+
+type ListType struct {
+	ItemType DataType
+	Items    []any
 }
 
 func DataTypeConvert(dt DataType, value any) (any, error) {
@@ -80,12 +87,60 @@ func DataTypeConvert(dt DataType, value any) (any, error) {
 		return Utf8(value)
 	case DataTypeDate:
 		return Date(value)
+	case DataTypeTimestamp:
+		return Timestamp(value)
 	case DataTypeTimestampS:
 		return TimestampS(value)
 	case DataTypeTimestampMs:
 		return TimestampMs(value)
+	case DataTypeList:
+		return List(value)
 	default:
 		return nil, ErrConversionNotSupported.Wrapf("data_type=%s, value_type=%T, value=%v", dt, value, value)
+	}
+}
+
+func ReflectTypeToDataType(rt reflect.Type) (DataType, error) {
+	switch rt.Kind() {
+	case reflect.Bool:
+		return DataTypeBool, nil
+	case reflect.Int8:
+		return DataTypeInt8, nil
+	case reflect.Int16:
+		return DataTypeInt16, nil
+	case reflect.Int32:
+		return DataTypeInt32, nil
+	case reflect.Int:
+		return DataTypeInt32, nil
+	case reflect.Int64:
+		return DataTypeInt64, nil
+	case reflect.Uint8:
+		return DataTypeUint8, nil
+	case reflect.Uint16:
+		return DataTypeUint16, nil
+	case reflect.Uint32:
+		return DataTypeUint32, nil
+	case reflect.Uint:
+		return DataTypeUint32, nil
+	case reflect.Uint64:
+		return DataTypeUint64, nil
+	case reflect.Float32:
+		return DataTypeFloat32, nil
+	case reflect.Float64:
+		return DataTypeFloat64, nil
+	case reflect.String:
+		return DataTypeUtf8, nil
+	case reflect.Slice:
+		return DataTypeList, nil
+	case reflect.Struct:
+		switch {
+		case rt == reflect.TypeOf(time.Time{}):
+			return DataTypeTimestamp, nil
+		default:
+			return DataTypeNull, ErrConversionNotSupported.Wrapf("reflect_type=%s", rt)
+		}
+	default:
+		return DataTypeNull, ErrConversionNotSupported.Wrapf("reflect_type=%s", rt)
 	}
 }
 
@@ -709,6 +764,31 @@ func Date(value any) (time.Time, error) {
 	}
 }
 
+func Timestamp(value any) (time.Time, error) {
+	var zero time.Time
+
+	switch v := value.(type) {
+	case time.Time:
+		return v, nil
+	case string:
+		for _, layout := range TimestampLayouts {
+			parsed, err := time.Parse(layout, v)
+			if err == nil {
+				return parsed, nil
+			}
+		}
+		return zero, ErrConversionNotSupported.Wrapf("from=%T to=timestamp value=%v", value, value)
+	case int8, int16, int32, int64, int, uint8, uint16, uint32, uint64, uint:
+		i64, err := Int64(v)
+		if err != nil {
+			return zero, err
+		}
+		return unixNanoseconds(i64), nil
+	default:
+		return zero, ErrConversionNotSupported.Wrapf("from=%T to=timestamp value=%v", value, value)
+	}
+}
+
 func TimestampS(value any) (time.Time, error) {
 	var zero time.Time
 
@@ -768,6 +848,45 @@ func TimestampMs(value any) (time.Time, error) {
 	}
 }
 
+func List(value any) (*ListType, error) {
+	zero := &ListType{
+		ItemType: DataTypeNull,
+		Items:    make([]any, 0),
+	}
+
+	switch v := value.(type) {
+	case bool:
+		return &ListType{ItemType: DataTypeBool, Items: []any{v}}, nil
+	case int8:
+		return &ListType{ItemType: DataTypeInt8, Items: []any{v}}, nil
+	case int16:
+		return &ListType{ItemType: DataTypeInt16, Items: []any{v}}, nil
+	case int32:
+		return &ListType{ItemType: DataTypeInt32, Items: []any{v}}, nil
+	case int:
+		return &ListType{ItemType: DataTypeInt32, Items: []any{v}}, nil
+	case int64:
+		return &ListType{ItemType: DataTypeInt32, Items: []any{v}}, nil
+	default:
+		rv := reflect.ValueOf(value)
+		if rv.Kind() != reflect.Slice {
+			return zero, ErrConversionNotSupported.Wrapf("from=%T to=list value=%v", value, value)
+		}
+		items := make([]any, rv.Len())
+		for i := 0; i < rv.Len(); i++ {
+			items[i] = rv.Index(i).Interface()
+		}
+		itemDataType, err := ReflectTypeToDataType(rv.Type().Elem())
+		if err != nil {
+			return nil, err
+		}
+		return &ListType{
+			ItemType: itemDataType,
+			Items:    items,
+		}, nil
+	}
+}
+
 // unixMillisToTime makes time.Time from milliseconds since unix epoch.
 func unixSeconds(seconds int64) time.Time {
 	return time.Unix(seconds, 0).UTC()
@@ -778,4 +897,9 @@ func unixMilliseconds(milliseconds int64) time.Time {
 	seconds := int64(milliseconds) / 1000
 	nanos := (milliseconds % seconds) * int64(time.Millisecond)
 	return time.Unix(seconds, nanos).UTC()
+}
+
+// unixNanoseconds makes time.Time from nanoseconds since unix epoch.
+func unixNanoseconds(nanoseconds int64) time.Time {
+	return time.Unix(0, nanoseconds).UTC()
 }
