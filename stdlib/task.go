@@ -12,7 +12,7 @@ var (
 	// DefaultCancelFn is the default cancel function for a task.
 	DefaultCancelFn = func(context.Context) error { return nil }
 	// DefaultCancelTimeout is the default timeout for a task cancel fn to run.
-	DefaultCancelTimeout = 30 * time.Second
+	DefaultCancelTimeout = 5 * time.Second
 )
 
 // ErrTaskTimeout is returned when a task reaches its timeout cancelled.
@@ -56,13 +56,7 @@ func WithTaskCancel(fn TaskCancelFn) Option[*TaskConfig] {
 
 // Task executes the given task with the provided context and options.
 func Task(ctx context.Context, task TaskFn, options ...Option[*TaskConfig]) error {
-	cfg, err := OptionApply(
-		&TaskConfig{
-			Timeout:       DefaultTaskTimeout,
-			CancelTimeout: DefaultCancelTimeout,
-		},
-		options...,
-	)
+	cfg, err := OptionApply(&TaskConfig{}, options...)
 	if err != nil {
 		return err
 	}
@@ -70,6 +64,12 @@ func Task(ctx context.Context, task TaskFn, options ...Option[*TaskConfig]) erro
 	// Tasks with no timeout or cancellation should run as standard function calls.
 	if cfg.Timeout == 0 && cfg.Cancel == nil {
 		return task(ctx)
+	}
+
+	// Tasks with no timeout but a cancel function, expect to run async, so we'll use
+	// sane defaults for this case.
+	if cfg.Timeout == 0 {
+		cfg.Timeout = DefaultTaskTimeout
 	}
 
 	ctx, cancel := context.WithTimeoutCause(ctx, cfg.Timeout, ErrTaskTimeout)
