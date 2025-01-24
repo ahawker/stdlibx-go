@@ -59,13 +59,17 @@ func Task(ctx context.Context, task TaskFn, options ...Option[*TaskConfig]) erro
 	cfg, err := OptionApply(
 		&TaskConfig{
 			Timeout:       DefaultTaskTimeout,
-			Cancel:        DefaultCancelFn,
 			CancelTimeout: DefaultCancelTimeout,
 		},
 		options...,
 	)
 	if err != nil {
 		return err
+	}
+
+	// Tasks with no timeout or cancellation should run as standard function calls.
+	if cfg.Timeout == 0 && cfg.Cancel == nil {
+		return task(ctx)
 	}
 
 	ctx, cancel := context.WithTimeoutCause(ctx, cfg.Timeout, ErrTaskTimeout)
@@ -92,7 +96,10 @@ func Task(ctx context.Context, task TaskFn, options ...Option[*TaskConfig]) erro
 			case <-done:
 				return
 			case <-ctx.Done():
-				eg.Append(context.Cause(ctx), cfg.Cancel(ctx))
+				eg.Append(context.Cause(ctx))
+				if cfg.Cancel != nil {
+					eg.Append(cfg.Cancel(ctx))
+				}
 				return
 			}
 		}
