@@ -24,6 +24,8 @@ const (
 	DataTypeInt32 DataType = "int32"
 	// DataTypeInt64 is a DataType of type int64.
 	DataTypeInt64 DataType = "int64"
+	// DataTypeInt128 is a DataType of type int128.
+	DataTypeInt128 DataType = "int128"
 	// DataTypeUint8 is a DataType of type uint8.
 	DataTypeUint8 DataType = "uint8"
 	// DataTypeUint16 is a DataType of type uint16.
@@ -32,6 +34,8 @@ const (
 	DataTypeUint32 DataType = "uint32"
 	// DataTypeUint64 is a DataType of type uint64.
 	DataTypeUint64 DataType = "uint64"
+	// DataTypeUint128 is a DataType of type uint128.
+	DataTypeUint128 DataType = "uint128"
 	// DataTypeFloat32 is a DataType of type float32.
 	DataTypeFloat32 DataType = "float32"
 	// DataTypeFloat64 is a DataType of type float64.
@@ -61,10 +65,12 @@ var _DataTypeNames = []string{
 	string(DataTypeInt16),
 	string(DataTypeInt32),
 	string(DataTypeInt64),
+	string(DataTypeInt128),
 	string(DataTypeUint8),
 	string(DataTypeUint16),
 	string(DataTypeUint32),
 	string(DataTypeUint64),
+	string(DataTypeUint128),
 	string(DataTypeFloat32),
 	string(DataTypeFloat64),
 	string(DataTypeBytes),
@@ -102,10 +108,12 @@ var _DataTypeValue = map[string]DataType{
 	"int16":        DataTypeInt16,
 	"int32":        DataTypeInt32,
 	"int64":        DataTypeInt64,
+	"int128":       DataTypeInt128,
 	"uint8":        DataTypeUint8,
 	"uint16":       DataTypeUint16,
 	"uint32":       DataTypeUint32,
 	"uint64":       DataTypeUint64,
+	"uint128":      DataTypeUint128,
 	"float32":      DataTypeFloat32,
 	"float64":      DataTypeFloat64,
 	"bytes":        DataTypeBytes,
