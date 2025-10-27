@@ -522,12 +522,12 @@ func Uint32(value any) (uint32, error) {
 		}
 		return uint32(v), nil
 	case int:
-		if v < 0 || v > math.MaxUint32 {
+		if v < 0 || v > math.MaxInt32 {
 			return zero, ErrPrecisionLoss.Wrapf("from=%T to=uint32 value=%v", v, v)
 		}
 		return uint32(v), nil
 	case int64:
-		if v < 0 || v > math.MaxUint32 {
+		if v < 0 || v > math.MaxInt64 {
 			return zero, ErrPrecisionLoss.Wrapf("from=%T to=uint32 value=%v", v, v)
 		}
 		return uint32(v), nil
