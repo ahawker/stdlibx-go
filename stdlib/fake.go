@@ -8,20 +8,7 @@ import (
 	"math/rand"
 	"regexp"
 	"sync/atomic"
-	"time"
 )
-
-var FakeRequestKey = NewContextKey[*FakeRequest](
-	"stdlib.FakeRequest",
-	&FakeRequest{
-		Generations: 1,
-		Rand:        rand.New(rand.NewSource(time.Now().UnixNano())),
-	},
-)
-
-func FakeContext(ctx context.Context, count uint64) context.Context {
-	return FakeRequestKey.WithValue(ctx, &FakeRequest{Generations: count})
-}
 
 type FakeRequest struct {
 	Generations uint64
@@ -100,22 +87,20 @@ type FakeNumber[T constraints.Integer | constraints.Float] struct {
 
 // Generate generates a fake number based on the configured options.
 func (n *FakeNumber[T]) Generate(ctx context.Context) T {
-	req := FakeRequestKey.Value(ctx)
-
 	// Defaults.
 	if n.RandomFn == nil {
 		n.RandomFn = func(ctx context.Context, n *FakeNumber[T]) T {
-			return RandomNumber[T](req.Rand)
+			return RandomNumber[T](GetGlobal())
 		}
 	}
 	if n.RangeFn == nil {
 		n.RangeFn = func(ctx context.Context, n *FakeNumber[T]) T {
-			return RandomNumberRange[T](req.Rand, n.Min, n.Max)
+			return RandomNumberRange[T](GetGlobal(), n.Min, n.Max)
 		}
 	}
 	if n.SelectFn == nil {
 		n.SelectFn = func(ctx context.Context, n *FakeNumber[T]) T {
-			return RandomSelection(req.Rand, n.Possible)
+			return RandomSelection(GetGlobal(), n.Possible)
 		}
 	}
 
@@ -166,27 +151,25 @@ type FakeText[T ~string] struct {
 
 // Generate generates fake text based on the configured options.
 func (t *FakeText[T]) Generate(ctx context.Context) T {
-	req := FakeRequestKey.Value(ctx)
-
 	// Defaults.
 	if t.RandomFn == nil {
 		t.RandomFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomString[T](req.Rand, t.MinLength, t.MaxLength)
+			return RandomString[T](GetGlobal(), t.MinLength, t.MaxLength)
 		}
 	}
 	if t.RangeFn == nil {
 		t.RangeFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomString[T](req.Rand, t.MinLength, t.MaxLength)
+			return RandomString[T](GetGlobal(), t.MinLength, t.MaxLength)
 		}
 	}
 	if t.PatternFn == nil {
 		t.PatternFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomRegex[T](req.Rand, t.Regex.String())
+			return RandomRegex[T](GetGlobal(), t.Regex.String())
 		}
 	}
 	if t.SelectFn == nil {
 		t.SelectFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomSelection(req.Rand, t.Possible)
+			return RandomSelection(GetGlobal(), t.Possible)
 		}
 	}
 
