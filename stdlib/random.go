@@ -6,14 +6,14 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"sync"
 	"time"
 )
 
-// Rand a default global random number generator.
+// Global random number generator.
 var (
-	Rand   *rand.Rand
-	Source rand.Source
-	Seed   int64
+	globalRandom *Random
+	globalLock   sync.Mutex
 )
 
 const (
@@ -23,26 +23,59 @@ const (
 )
 
 func init() {
+	var seed int64
 	if s, ok := os.LookupEnv("STDLIB_RANDOM_SEED"); ok {
-		Seed = int64(MustInt(s))
-		Source = rand.NewSource(Seed)
-		Rand = rand.New(Source)
+		seed = int64(MustInt(s))
 	} else {
-		Seed = time.Now().UnixNano()
-		Source = rand.NewSource(Seed)
-		Rand = rand.New(Source)
+		seed = time.Now().UnixNano()
+	}
+	globalRandom = NewRandom(seed)
+}
+
+// GetGlobal returns the global Random instance and locks it for exclusive use.
+func GetGlobal() *Random {
+	globalLock.Lock()
+	return globalRandom
+}
+
+// ReturnGlobal returns the global Random instance and unlocks it.
+func ReturnGlobal(random *Random) {
+	defer globalLock.Unlock()
+	if random != globalRandom {
+		panic("ReturnGlobal received non-global Random instance")
 	}
 }
 
+// NewRandom creates a new Random instance with the provided seed.
+func NewRandom(seed int64) *Random {
+	source := rand.NewSource(seed)
+	return &Random{
+		Rand:   rand.New(source),
+		Source: source,
+		Seed:   seed,
+	}
+}
+
+// Random represents a random number generator with its source and seed.
+//
+// Callers are free to create their own and pass them into functions or
+// use the 'Get' and 'Return' functions to borrow the global one.
+type Random struct {
+	Rand   *rand.Rand
+	Source rand.Source
+	Seed   int64
+}
+
 // RandomSelection returns a random item from the provided list of items.
-func RandomSelection[T any](rng *rand.Rand, items []T) T {
+func RandomSelection[T any](r *Random, items []T) T {
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	switch len(items) {
 	case 0:
 		return *new(T)
 	case 1:
 		return items[0]
 	default:
-		return items[rng.Intn(len(items))]
+		return items[r.Rand.Intn(len(items))]
 	}
 }
 
@@ -59,61 +92,61 @@ func RandomExcluding[T comparable](fn func() T, exclude map[T]struct{}) T {
 }
 
 // RandomNumber returns a random number between primitive value min & max.
-func RandomNumber[T constraints.Integer | constraints.Float](rng *rand.Rand) T {
+func RandomNumber[T constraints.Integer | constraints.Float](r *Random) T {
 	switch t := any(*new(T)).(type) {
 	case uint8:
-		return T(RandomNumberRange(rng, uint8(0), math.MaxUint8))
+		return T(RandomNumberRange(r, uint8(0), math.MaxUint8))
 	case uint16:
-		return T(RandomNumberRange(rng, uint16(0), math.MaxUint16))
+		return T(RandomNumberRange(r, uint16(0), math.MaxUint16))
 	case uint32:
-		return T(RandomNumberRange(rng, uint32(0), math.MaxUint32))
+		return T(RandomNumberRange(r, uint32(0), math.MaxUint32))
 	case uint:
-		return T(RandomNumberRange(rng, uint(0), math.MaxUint))
+		return T(RandomNumberRange(r, uint(0), math.MaxUint))
 	case uint64:
-		return T(RandomNumberRange(rng, uint64(0), math.MaxUint64))
+		return T(RandomNumberRange(r, uint64(0), math.MaxUint64))
 	case int8:
-		return T(RandomNumberRange(rng, int8(0), math.MaxInt8))
+		return T(RandomNumberRange(r, int8(0), math.MaxInt8))
 	case int16:
-		return T(RandomNumberRange(rng, int16(0), math.MaxInt16))
+		return T(RandomNumberRange(r, int16(0), math.MaxInt16))
 	case int32:
-		return T(RandomNumberRange(rng, int32(0), math.MaxInt32))
+		return T(RandomNumberRange(r, int32(0), math.MaxInt32))
 	case int:
-		return T(RandomNumberRange(rng, int(0), math.MaxInt))
+		return T(RandomNumberRange(r, int(0), math.MaxInt))
 	case int64:
-		return T(RandomNumberRange(rng, int64(0), math.MaxInt64))
+		return T(RandomNumberRange(r, int64(0), math.MaxInt64))
 	case float32:
-		return T(RandomNumberRange(rng, float32(0), math.MaxFloat32))
+		return T(RandomNumberRange(r, float32(0), math.MaxFloat32))
 	case float64:
-		return T(RandomNumberRange(rng, float64(0), math.MaxFloat64))
+		return T(RandomNumberRange(r, float64(0), math.MaxFloat64))
 	default:
 		panic(fmt.Sprintf("RandomNumber[%T] not supported", t))
 	}
 }
 
 // RandomNumberRange returns a random number between min (inclusive) and max (exclusive).
-func RandomNumberRange[T constraints.Integer | constraints.Float](rng *rand.Rand, min, max T) T {
+func RandomNumberRange[T constraints.Integer | constraints.Float](r *Random, min, max T) T {
 	switch any(min).(type) {
 	case uint8, uint16, uint32, uint:
-		return T(rng.Int31n(int32(max-min+1)) - int32(min))
+		return T(r.Rand.Int31n(int32(max-min+1)) - int32(min))
 	case uint64, int64:
-		return T(rng.Int63n(int64(max-min+1)) - int64(min))
+		return T(r.Rand.Int63n(int64(max-min+1)) - int64(min))
 	case int8, int16, int32, int:
-		return T(rng.Int31n(int32(max-min+1)) - int32(min))
+		return T(r.Rand.Int31n(int32(max-min+1)) - int32(min))
 	case float32:
-		return T(float32(min) + rand.Float32()*float32(max-min))
+		return T(float32(min) + r.Rand.Float32()*float32(max-min))
 	case float64:
-		return T(float64(min) + rand.Float64()*float64(max-min))
+		return T(float64(min) + r.Rand.Float64()*float64(max-min))
 	default:
 		panic(fmt.Sprintf("RandomNumberRange[%T] not supported", min))
 	}
 }
 
 // RandomString returns a random string between min length (inclusive) and max length (exclusive).
-func RandomString[T ~string](rng *rand.Rand, min, max uint64) T {
-	length := RandomNumberRange[uint64](rng, min, max)
+func RandomString[T ~string](r *Random, min, max uint64) T {
+	length := RandomNumberRange[uint64](r, min, max)
 	result := make([]rune, length)
 	for i := uint64(0); i < length; i++ {
-		result[i] = rune(alphaNumeric[rng.Intn(len(alphabet))])
+		result[i] = rune(alphaNumeric[r.Rand.Intn(len(alphabet))])
 	}
 	return T(result)
 }
