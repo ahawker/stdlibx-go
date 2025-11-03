@@ -90,17 +90,26 @@ func (n *FakeNumber[T]) Generate(ctx context.Context) T {
 	// Defaults.
 	if n.RandomFn == nil {
 		n.RandomFn = func(ctx context.Context, n *FakeNumber[T]) T {
-			return RandomNumber[T](GetGlobal())
+			random := GetGlobal()
+			defer ReturnGlobal(random)
+
+			return RandomNumber[T](random)
 		}
 	}
 	if n.RangeFn == nil {
 		n.RangeFn = func(ctx context.Context, n *FakeNumber[T]) T {
-			return RandomNumberRange[T](GetGlobal(), n.Min, n.Max)
+			random := GetGlobal()
+			defer ReturnGlobal(random)
+
+			return RandomNumberRange[T](random, n.Min, n.Max)
 		}
 	}
 	if n.SelectFn == nil {
 		n.SelectFn = func(ctx context.Context, n *FakeNumber[T]) T {
-			return RandomSelection(GetGlobal(), n.Possible)
+			random := GetGlobal()
+			defer ReturnGlobal(random)
+
+			return RandomSelection(random, n.Possible)
 		}
 	}
 
@@ -154,22 +163,34 @@ func (t *FakeText[T]) Generate(ctx context.Context) T {
 	// Defaults.
 	if t.RandomFn == nil {
 		t.RandomFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomString[T](GetGlobal(), t.MinLength, t.MaxLength)
+			random := GetGlobal()
+			defer ReturnGlobal(random)
+
+			return RandomString[T](random, t.MinLength, t.MaxLength)
 		}
 	}
 	if t.RangeFn == nil {
 		t.RangeFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomString[T](GetGlobal(), t.MinLength, t.MaxLength)
+			random := GetGlobal()
+			defer ReturnGlobal(random)
+
+			return RandomString[T](random, t.MinLength, t.MaxLength)
 		}
 	}
 	if t.PatternFn == nil {
 		t.PatternFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomRegex[T](GetGlobal(), t.Regex.String())
+			random := GetGlobal()
+			defer ReturnGlobal(random)
+
+			return RandomRegex[T](random, t.Regex.String())
 		}
 	}
 	if t.SelectFn == nil {
 		t.SelectFn = func(ctx context.Context, t *FakeText[T]) T {
-			return RandomSelection(GetGlobal(), t.Possible)
+			random := GetGlobal()
+			defer ReturnGlobal(random)
+
+			return RandomSelection(random, t.Possible)
 		}
 	}
 
